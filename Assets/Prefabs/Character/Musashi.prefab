@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 8158973981744085469}
   - component: {fileID: 3918127365157503231}
   - component: {fileID: 7983942537718171118}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Musashi
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -35,6 +35,7 @@ Transform:
   m_Children:
   - {fileID: 5888169166545284370}
   - {fileID: 8528309190354051798}
+  - {fileID: 7995581080504901776}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -147,7 +148,7 @@ BoxCollider2D:
   m_GameObject: {fileID: 2029188877338541027}
   m_Enabled: 1
   m_Density: 1
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: bfdbaa6c5f1f80747a150f3dc95e7fbc, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -196,22 +197,64 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 3
+  jumpForce: 8
   groundCheck: {fileID: 5888169166545284370}
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
-  jumpForce: 8
-  audioManager: {fileID: 0}
+  dashSpeed: 15
+  dashDuration: 0.2
+  dashCooldown: 1
+  maxStamina: 100
+  currentStamina: 0
   isGrounded: 0
   isRunning: 0
   isWalking: 0
   isHoldingShift: 0
   isMoving: 0
   facingRight: 0
+  attackDamage: 100
   shurikenPrefab: {fileID: 3459222161911421909, guid: ad009fe1b149b4340a55003b8eaee471, type: 3}
   firePoint: {fileID: 8528309190354051798}
+  attackPoint: {fileID: 0}
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  attackRange: 0.5
   noOfClicks: 0
   maxComboDelay: 1
+  audioManager: {fileID: 0}
+--- !u!1 &5907965567597438082
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7995581080504901776}
+  m_Layer: 3
+  m_Name: AttackPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7995581080504901776
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5907965567597438082}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1.186, y: -0.478, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 86904534232315489}
+  m_RootOrder: -1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6734921496204750887
 GameObject:
   m_ObjectHideFlags: 0
@@ -221,7 +264,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8528309190354051798}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: FirePoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -252,7 +295,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5888169166545284370}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: GroundCheck
   m_TagString: Untagged
   m_Icon: {fileID: 0}
