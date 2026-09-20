@@ -3,72 +3,44 @@ using UnityEngine;
 
 public class EnemyBase : MonoBehaviour
 {
-    [Header("Enemy Stats")]
+    [Header("Base Stats")]
     public float maxHealth = 150f;
     public float currentHealth;
     public float defense = 70f;
-
-    private SpriteRenderer spriteRenderer;
-    private Animator anim;
-    private Collider2D col; // dùng để tắt va chạm khi chết
-    private Rigidbody2D rb;
-    private AudioManager audioManager;
     public float moveSpeed = 2f;
-    public bool facingRight = true;
-    public Transform groundCheck;
-    public Transform wallCheck;
-    public LayerMask groundLayer;
 
-    // Start is called before the first frame update
-    void Start()
+
+    protected Animator anim;
+    protected Collider2D col; // dùng để tắt va chạm khi chết
+    protected Rigidbody2D rb;
+
+    protected Player playerScript;  // script để gọi hàm gây sát thương lên player
+    protected Transform player;   // lưu vị trí của player để quái di chuyển theo tấn công
+
+
+    [Header("Audio Settings")]
+    protected AudioManager audioManager;
+    public AudioClip hurtSound;
+    public AudioClip deathSound;
+
+
+    protected virtual void Start()
     {
         currentHealth = maxHealth;
-        spriteRenderer = GetComponent<SpriteRenderer>();
         anim = GetComponent<Animator>();
         col = GetComponent<Collider2D>();
         rb = GetComponent<Rigidbody2D>();
         audioManager = FindAnyObjectByType<AudioManager>();
-        facingRight = true;
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        if(currentHealth <= 0)
+        playerScript = FindAnyObjectByType<Player>();
+        if (playerScript != null)
         {
-            return;
-        }
-
-        Patrol();
-
-    }
-
-
-    private void Patrol()
-    {
-        anim.SetBool("isRunning", true);
-        float direction = facingRight ? 1f : -1f;
-
-        rb.velocity = new Vector2(direction * moveSpeed, rb.velocity.y);
-
-        bool isGrounded = Physics2D.OverlapCircle(groundCheck.position, 0.2f, groundLayer);
-        bool isWallHit = Physics2D.OverlapCircle(wallCheck.position, 0.2f, groundLayer);
-        if (!isGrounded || isWallHit)
-        {
-            Flip();
+            player = playerScript.gameObject.transform;     // tham chiếu đến component transform của player
         }
     }
 
 
-    private void Flip()
-    {
-        facingRight = !facingRight;
-        transform.localScale = new Vector3(-transform.localScale.x, 1, 1);
-    }
 
-
-
-    // hàm này được gọi khi Musashi tấn công enemy
+    // hàm này được gọi khi Musashi tấn công enemy (logic áp dụng cho mọi enemy)
     public void TakeDamage(float incomingDamage)
     {
         float actualDamage = incomingDamage - defense; // sát thương trừ vào giáp
@@ -82,7 +54,6 @@ public class EnemyBase : MonoBehaviour
         Debug.Log(gameObject.name + "mất " + actualDamage + "hp! còn lại: " + currentHealth);
 
         anim.SetTrigger("hurt");
-        StartCoroutine(FlashRedRoutine());  // gọi hiệu ứng chớp đỏ báo hiệu trúng đòn
 
         if (currentHealth <= 0)     // nếu hết máu thì gọi die()
         {
@@ -90,15 +61,8 @@ public class EnemyBase : MonoBehaviour
         }
     }
 
-    private IEnumerator FlashRedRoutine()
-    {
-        // đổi màu enemy sang đỏ trong 0.1s rồi trả lại màu gốc
-        spriteRenderer.color = Color.red;
-        yield return new WaitForSeconds(0.1f);
-        spriteRenderer.color = Color.white;
-    }
-
-    private void Die()
+    // hàm chung nhưng logic có thể bổ sung thêm phần thưởng tùy enemy
+    protected virtual void Die()
     {
         anim.SetTrigger("death");   // chạy animation death
         col.enabled = false;    // tắt va chạm để đi xuyên xác chết
@@ -109,19 +73,19 @@ public class EnemyBase : MonoBehaviour
     }
 
 
-    private void TriggerHurtSound()
+    protected void TriggerHurtSound()
     {
-        if (audioManager != null)
+        if (audioManager != null && hurtSound != null)
         {
-            audioManager.PlayEnemyHurtSound();
+            audioManager.PlayerSFX(hurtSound);
         }
     }
 
-    private void TriggerDeathSound()
+    protected void TriggerDeathSound()
     {
-        if (audioManager != null)
+        if (audioManager != null && deathSound != null)
         {
-            audioManager.PlayEnemyDeathSound();
+            audioManager.PlayerSFX(deathSound);
         }
     }
 

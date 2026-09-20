@@ -23,6 +23,9 @@ public class Player : MonoBehaviour
     [Header("Stats")]
     public float maxStamina = 100f;
     public float currentStamina;
+    public float maxHealth = 100f;
+    public float currentHealth;
+    private SpriteRenderer spriteRenderer;
 
 
     [Header("States")]
@@ -46,15 +49,24 @@ public class Player : MonoBehaviour
     private float lastClickedTime = 0;
     public float maxComboDelay = 1f; // chờ 1s nếu ko bấm tiếp thì reset combo
 
+    [Header("Musashi Sounds")]
 
-    public AudioManager audioManager;
+    private AudioManager audioManager;
+    public AudioClip attackSound;
+    public AudioClip shurikenSound;
+    public AudioClip dashSound;
+    public AudioClip hurtSound;
+    public AudioClip deathSound;
 
     private void Start()
     {
         facingRight = true;
         rb = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
         currentStamina = maxStamina;
+        currentHealth = maxHealth;
+        audioManager = FindAnyObjectByType<AudioManager>();
     }
 
 
@@ -137,7 +149,7 @@ public class Player : MonoBehaviour
 
         foreach (Collider2D enemyCollider in hitEnemies)
         {
-            EnemyBase enemyScript = enemyCollider.gameObject.GetComponent<EnemyBase>();
+            EnemyBase enemyScript = enemyCollider.gameObject.GetComponent<EnemyBase>();     // thông qua component lấy gameobject rồi lấy tiếp component
             if (enemyScript != null)
             {
                 enemyScript.TakeDamage(attackDamage);
@@ -169,10 +181,8 @@ public class Player : MonoBehaviour
 
     private IEnumerator DashRoutine()
     {
-        // khi bắt đầu lướt bỏ qua collider
-        Physics2D.IgnoreLayerCollision(LayerMask.NameToLayer("Player"), LayerMask.NameToLayer("Enemy"), true);
-
         // 1. bắt đầu lướt
+        isDashing = true;
         isDashing = true;
         currentStamina -= 2;
         anim.SetTrigger("dash");
@@ -188,24 +198,38 @@ public class Player : MonoBehaviour
         // chờ trong khoảng tgian lướt 
         yield return new WaitForSeconds(dashDuration);
 
-        // kết thúc lướt
-        Physics2D.IgnoreLayerCollision(LayerMask.NameToLayer("Player"), LayerMask.NameToLayer("Enemy"), false);
         rb.gravityScale = originalGravity;
         isDashing = false;
         lastDashTime = Time.time;
     }
 
 
-
-    public void TakeDamage()
+    public void TakeDamage(float damage)
     {
-        anim.SetTrigger("hurt");
+        if (currentHealth <= 0)
+        {
+            return;
+        }
+
+        currentHealth -= damage;
+
+
+        if (currentHealth > 0)
+        {
+            anim.SetTrigger("hurt");
+            Debug.Log("Musashi HP" + currentHealth);
+        }
+        else
+        {
+            Die();
+        }
     }
 
 
     public void Die()
     {
         anim.SetTrigger("death");
+        rb.simulated = false;
         this.enabled = false;
     }
 
@@ -318,25 +342,42 @@ public class Player : MonoBehaviour
 
     public void TriggerAttackSound()
     {
-        if (audioManager != null)
+        if (audioManager != null && attackSound != null)
         {
-            audioManager.PlayAttackSound();
+            audioManager.PlayerSFX(attackSound);
         }
     }
 
     public void TriggerThrowShurikenSound()
     {
-        if (audioManager != null)
+        if (audioManager != null && shurikenSound != null)
         {
-            audioManager.PlayThrowShurikenSound();
+            audioManager.PlayerSFX(shurikenSound);
         }
     }
 
     public void TriggerDashSound()
     {
-        if (audioManager != null)
+        if (audioManager != null && dashSound != null)
         {
-            audioManager.PlayDashSound();
+            audioManager.PlayerSFX(dashSound);
+        }
+    }
+
+
+    public void TriggerHurtSound()
+    {
+        if (audioManager != null && hurtSound != null)
+        {
+            audioManager.PlayerSFX(hurtSound);
+        }
+    }
+
+    public void TriggerDeathSound()
+    {
+        if (audioManager != null && deathSound != null)
+        {
+            audioManager.PlayerSFX(deathSound);
         }
     }
 
