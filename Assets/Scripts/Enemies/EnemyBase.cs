@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using UnityEngine;
 
 public class EnemyBase : MonoBehaviour
@@ -54,6 +54,7 @@ public class EnemyBase : MonoBehaviour
         Debug.Log(gameObject.name + "mất " + actualDamage + "hp! còn lại: " + currentHealth);
 
         anim.SetTrigger("hurt");
+        TriggerHurtSound();     // phát âm thanh khi bị trúng đòn
 
         if (currentHealth <= 0)     // nếu hết máu thì gọi die()
         {
@@ -64,6 +65,7 @@ public class EnemyBase : MonoBehaviour
     // hàm chung nhưng logic có thể bổ sung thêm phần thưởng tùy enemy
     protected virtual void Die()
     {
+        TriggerDeathSound();    // phát âm thanh khi bị tiêu diệt
         anim.SetTrigger("death");   // chạy animation death
         col.enabled = false;    // tắt va chạm để đi xuyên xác chết
         this.enabled = false;   // tắt script này
