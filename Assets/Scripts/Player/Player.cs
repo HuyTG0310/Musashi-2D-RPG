@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -254,10 +254,15 @@ public class Player : MonoBehaviour
         currentHealth -= damage;
         UpdateHealthUI();
 
+
         if (currentHealth > 0)
         {
             anim.SetTrigger("hurt");
-            Debug.Log("Musashi HP" + currentHealth);
+            if (audioManager != null && hurtSound != null)
+            {
+                audioManager.PlayerSFX(hurtSound);
+            }
+            Debug.Log("Musashi HP: " + currentHealth);
         }
         else
         {
@@ -265,10 +270,13 @@ public class Player : MonoBehaviour
         }
     }
 
-
     public void Die()
     {
         anim.SetTrigger("death");
+        if (audioManager != null && deathSound != null)
+        {
+            audioManager.PlayerSFX(deathSound);
+        }
         rb.simulated = false;
         this.enabled = false;
     }
