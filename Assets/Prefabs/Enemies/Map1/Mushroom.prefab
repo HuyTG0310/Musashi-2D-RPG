@@ -234,7 +234,7 @@ MonoBehaviour:
   hurtSound: {fileID: 8300000, guid: 515b671c8a01ab4489a60e8fe21dfb32, type: 3}
   deathSound: {fileID: 8300000, guid: 9f87dc07a0201ec4bad07692b4e9fe88, type: 3}
   chaseRange: 5
-  attackRange: 1.2
+  attackRange: 3
   attackCooldown: 2
   attackDamage: 20
   lastAttackTime: 0

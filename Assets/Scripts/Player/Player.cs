@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
@@ -26,6 +27,7 @@ public class Player : MonoBehaviour
     public float maxHealth = 100f;
     public float currentHealth;
     private SpriteRenderer spriteRenderer;
+    public float staminaTimer = 0f;
 
 
     [Header("States")]
@@ -58,6 +60,11 @@ public class Player : MonoBehaviour
     public AudioClip hurtSound;
     public AudioClip deathSound;
 
+
+    public Image hpFillImage;
+    private bool isDefending;
+    public Image spFillImage;
+
     private void Start()
     {
         facingRight = true;
@@ -67,6 +74,7 @@ public class Player : MonoBehaviour
         currentStamina = maxStamina;
         currentHealth = maxHealth;
         audioManager = FindAnyObjectByType<AudioManager>();
+        UpdateHealthUI();
     }
 
 
@@ -78,11 +86,14 @@ public class Player : MonoBehaviour
             return;
         }
 
+
         HandleMovement();
         HandleDash();
         HandleComboTransitions();
         HandleDefend();
         ThrowShuriken();
+        HandleStaminaRegen();
+        UpdateStaminahUI();
 
         // 1. reset combo nếu quá thời gian
         if (Time.time - lastClickedTime > maxComboDelay)
@@ -94,6 +105,30 @@ public class Player : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.J) && isGrounded && !isRunning)
         {
             OnClick();
+        }
+    }
+
+
+    private void HandleStaminaRegen()
+    {
+        if (isDefending || currentStamina >= maxStamina)
+        {
+            staminaTimer = 0f;
+            return;
+        }
+
+        staminaTimer += Time.deltaTime;
+
+        if (staminaTimer >= 1f)
+        {
+            currentStamina += 5f;
+
+            if (currentStamina > maxStamina)
+            {
+                currentStamina = maxStamina;
+            }
+
+            staminaTimer = 0f;
         }
     }
 
@@ -211,8 +246,13 @@ public class Player : MonoBehaviour
             return;
         }
 
-        currentHealth -= damage;
+        if (isDefending)
+        {
+            return;
+        }
 
+        currentHealth -= damage;
+        UpdateHealthUI();
 
         if (currentHealth > 0)
         {
@@ -234,7 +274,21 @@ public class Player : MonoBehaviour
     }
 
 
+    private void UpdateHealthUI()
+    {
+        if (hpFillImage != null)
+        {
+            hpFillImage.fillAmount = currentHealth / maxHealth;
+        }
+    }
 
+    private void UpdateStaminahUI()
+    {
+        if (hpFillImage != null)
+        {
+            spFillImage.fillAmount = currentStamina / maxStamina;
+        }
+    }
 
 
 
@@ -270,11 +324,13 @@ public class Player : MonoBehaviour
     {
         if (isGrounded && Input.GetKeyDown(KeyCode.K))
         {
+            isDefending = true;
             anim.SetBool("isDefending", true);
             rb.velocity = new Vector2(0, rb.velocity.y);
         }
         else if (isGrounded && Input.GetKeyUp(KeyCode.K))
         {
+            isDefending = false;
             anim.SetBool("isDefending", false);
         }
     }
