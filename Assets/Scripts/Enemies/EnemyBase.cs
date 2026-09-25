@@ -51,14 +51,18 @@ public class EnemyBase : MonoBehaviour
         }
 
         currentHealth -= actualDamage;      // trừ máu
-        Debug.Log(gameObject.name + "mất " + actualDamage + "hp! còn lại: " + currentHealth);
+        Debug.Log(gameObject.name + " mất " + actualDamage + "hp! còn lại: " + currentHealth);
 
-        anim.SetTrigger("hurt");
-        TriggerHurtSound();     // phát âm thanh khi bị trúng đòn
-
-        if (currentHealth <= 0)     // nếu hết máu thì gọi die()
+        // KIỂM TRA MÁU TRƯỚC KHI KÍCH HOẠT ANIMATION
+        if (currentHealth <= 0)      
         {
+            // Nếu chết: Chỉ gọi Die() (trong Die đã chứa lệnh phát animation death)
             Die();
+        }
+        else
+        {
+            // Nếu còn sống: Chỉ chạy animation hurt và phát âm thanh hurt
+            anim.SetTrigger("hurt");
         }
     }
 

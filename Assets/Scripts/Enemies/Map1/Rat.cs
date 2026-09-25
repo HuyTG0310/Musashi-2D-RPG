@@ -42,6 +42,14 @@ namespace Assets.Scripts.Enemies.Map1
                 return;
             }
 
+            AnimatorStateInfo stateInfo = anim.GetCurrentAnimatorStateInfo(0);
+           
+            if (stateInfo.IsName("Hurt"))
+            {
+                rb.velocity = Vector2.zero; // Ép đứng im ngay lập tức
+                return; // Thoát hàm Update, ngắt hoàn toàn logic đuổi/tuần tra bên dưới
+            }
+
             // tính khoảng cách đến player
             float distanceToPlayer = Vector2.Distance(transform.position, player.position);
 
