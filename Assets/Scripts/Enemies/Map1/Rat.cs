@@ -53,6 +53,7 @@ namespace Assets.Scripts.Enemies.Map1
             // tính khoảng cách đến player
             float distanceToPlayer = Vector2.Distance(transform.position, player.position);
 
+
             // nếu trong vùng tấn công và player còn sống
             if (distanceToPlayer <= attackRange && playerScript.currentHealth > 0)
             {
@@ -92,6 +93,8 @@ namespace Assets.Scripts.Enemies.Map1
             // nếu gần té hoặc chạm tường thì đổi hướng
             if (!isGrounded || isWallHit)
             {
+
+                Debug.Log($"isGrounded {isGrounded}, isWallHit {isWallHit}");
                 Flip();
             }
         }
