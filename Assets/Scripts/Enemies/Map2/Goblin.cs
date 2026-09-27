@@ -13,6 +13,8 @@ namespace Assets.Scripts.Enemies.Map2
 
         [Header("Goblin Movement")]
         public bool facingRight = true;
+        public float patrolDistance = 4f;   // Khoảng cách tuần tra tối đa từ điểm ban đầu
+        private float startX;
         public Transform groundCheck;
         public Transform wallCheck;
         public LayerMask groundLayer;
@@ -31,6 +33,7 @@ namespace Assets.Scripts.Enemies.Map2
         {
             base.Start();
             facingRight = true;
+            startX = transform.position.x;
             moveSpeed = 3f + Random.Range(-0.3f, 0.5f);
             maxHealth = 120f;
             currentHealth = maxHealth;
@@ -73,7 +76,22 @@ namespace Assets.Scripts.Enemies.Map2
             float direction = facingRight ? 1f : -1f;
             if (rb != null) rb.velocity = new Vector2(direction * moveSpeed, rb.velocity.y);
 
-            // Kiểm tra xem groundLayer đã được chọn chưa (khác Nothing)
+            // 1. Tự động quay đầu nếu đi quá phạm vi tuần tra (chỉ áp dụng nếu patrolDistance > 0)
+            if (patrolDistance > 0)
+            {
+                if (facingRight && transform.position.x >= startX + patrolDistance)
+                {
+                    Flip();
+                    return;
+                }
+                else if (!facingRight && transform.position.x <= startX - patrolDistance)
+                {
+                    Flip();
+                    return;
+                }
+            }
+
+            // 2. Kiểm tra xem groundLayer đã được chọn chưa (khác Nothing)
             if (groundLayer.value == 0) return;
 
             bool isGrounded = true;
@@ -98,11 +116,14 @@ namespace Assets.Scripts.Enemies.Map2
         {
             if (anim != null) anim.SetBool("isRunning", true);
 
-            if (player.position.x > transform.position.x && !facingRight)
+            float xDiff = player.position.x - transform.position.x;
+
+            // Chỉ quay đầu khi khoảng cách X đủ lớn (> 0.3f) để tránh bị giật xoay tại chỗ
+            if (xDiff > 0.3f && !facingRight)
             {
                 Flip();
             }
-            else if (player.position.x < transform.position.x && facingRight)
+            else if (xDiff < -0.3f && facingRight)
             {
                 Flip();
             }

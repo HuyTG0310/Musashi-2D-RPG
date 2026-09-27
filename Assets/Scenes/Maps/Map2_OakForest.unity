@@ -3621,6 +3621,83 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
+--- !u!1001 &5096651679812571205
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1320755955998524674, guid: dc09bce7d496f334ba69047fedfc4e9a, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0.77
+      objectReference: {fileID: 0}
+    - target: {fileID: 1320755955998524674, guid: dc09bce7d496f334ba69047fedfc4e9a, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.25
+      objectReference: {fileID: 0}
+    - target: {fileID: 2684440859617491019, guid: dc09bce7d496f334ba69047fedfc4e9a, type: 3}
+      propertyPath: m_RootOrder
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 2684440859617491019, guid: dc09bce7d496f334ba69047fedfc4e9a, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -1.41
+      objectReference: {fileID: 0}
+    - target: {fileID: 2684440859617491019, guid: dc09bce7d496f334ba69047fedfc4e9a, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 2.54
+      objectReference: {fileID: 0}
+    - target: {fileID: 2684440859617491019, guid: dc09bce7d496f334ba69047fedfc4e9a, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2684440859617491019, guid: dc09bce7d496f334ba69047fedfc4e9a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2684440859617491019, guid: dc09bce7d496f334ba69047fedfc4e9a, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2684440859617491019, guid: dc09bce7d496f334ba69047fedfc4e9a, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2684440859617491019, guid: dc09bce7d496f334ba69047fedfc4e9a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2684440859617491019, guid: dc09bce7d496f334ba69047fedfc4e9a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2684440859617491019, guid: dc09bce7d496f334ba69047fedfc4e9a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2684440859617491019, guid: dc09bce7d496f334ba69047fedfc4e9a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6194246312305830051, guid: dc09bce7d496f334ba69047fedfc4e9a, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.75
+      objectReference: {fileID: 0}
+    - target: {fileID: 6194246312305830051, guid: dc09bce7d496f334ba69047fedfc4e9a, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -1.47
+      objectReference: {fileID: 0}
+    - target: {fileID: 9073204902106438016, guid: dc09bce7d496f334ba69047fedfc4e9a, type: 3}
+      propertyPath: m_Name
+      value: Skeleton
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: dc09bce7d496f334ba69047fedfc4e9a, type: 3}
 --- !u!1001 &7553549275683763179
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3635,7 +3712,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 11093622654117418, guid: c705e54e665815f469e2168e0b6761f7, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -1.97
+      value: 4.69
       objectReference: {fileID: 0}
     - target: {fileID: 11093622654117418, guid: c705e54e665815f469e2168e0b6761f7, type: 3}
       propertyPath: m_LocalPosition.y
@@ -3676,6 +3753,18 @@ PrefabInstance:
     - target: {fileID: 421327702218653970, guid: c705e54e665815f469e2168e0b6761f7, type: 3}
       propertyPath: m_Name
       value: Goblin
+      objectReference: {fileID: 0}
+    - target: {fileID: 421327702218653970, guid: c705e54e665815f469e2168e0b6761f7, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4519085514073624888, guid: c705e54e665815f469e2168e0b6761f7, type: 3}
+      propertyPath: attackRadius
+      value: 3.88
+      objectReference: {fileID: 0}
+    - target: {fileID: 6965169636953607010, guid: c705e54e665815f469e2168e0b6761f7, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
