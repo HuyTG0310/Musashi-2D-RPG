@@ -180,6 +180,8 @@ public class Player : MonoBehaviour
     // hàm này được gọi trong animation attack
     private void CheckHit()
     {
+        if (attackPoint == null) return;
+
         Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(attackPoint.position, attackRange, enemyLayer);
 
         foreach (Collider2D enemyCollider in hitEnemies)
