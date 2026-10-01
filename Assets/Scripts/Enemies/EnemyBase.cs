@@ -16,7 +16,7 @@ public class EnemyBase : MonoBehaviour
 
     protected Player playerScript;  // script để gọi hàm gây sát thương lên player
     protected Transform player;   // lưu vị trí của player để quái di chuyển theo tấn công
-
+    private SpriteRenderer spriteRenderer;
 
     [Header("Audio Settings")]
     protected AudioManager audioManager;
@@ -36,6 +36,7 @@ public class EnemyBase : MonoBehaviour
         {
             player = playerScript.gameObject.transform;     // tham chiếu đến component transform của player
         }
+        spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
 
@@ -63,6 +64,7 @@ public class EnemyBase : MonoBehaviour
         {
             // Nếu còn sống: Chỉ chạy animation hurt và phát âm thanh hurt
             anim.SetTrigger("hurt");
+            StartCoroutine(FlashRedRoutine());
         }
     }
 
@@ -95,4 +97,12 @@ public class EnemyBase : MonoBehaviour
         }
     }
 
+
+    private IEnumerator FlashRedRoutine()
+    {
+        // đổi màu enemy sang đỏ trong 0.1s rồi trả lại màu gốc
+        spriteRenderer.color = Color.red;
+        yield return new WaitForSeconds(0.1f);
+        spriteRenderer.color = Color.white;
+    }
 }
