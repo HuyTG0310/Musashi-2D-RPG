@@ -1460,7 +1460,7 @@ MonoBehaviour:
   maxHealth: 150
   currentHealth: 0
   defense: 70
-  moveSpeed: 2
+  moveSpeed: 6.93
   hurtSound: {fileID: 0}
   deathSound: {fileID: 0}
   chaseRange: 7
