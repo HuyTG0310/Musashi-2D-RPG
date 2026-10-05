@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class EnemyBase : MonoBehaviour
 {
@@ -23,6 +24,8 @@ public class EnemyBase : MonoBehaviour
     public AudioClip hurtSound;
     public AudioClip deathSound;
 
+    [Header("UI Settings")]
+    public Image healthBarFill;
 
     protected virtual void Start()
     {
@@ -54,9 +57,18 @@ public class EnemyBase : MonoBehaviour
         currentHealth -= actualDamage;      // trừ máu
         Debug.Log(gameObject.name + " mất " + actualDamage + "hp! còn lại: " + currentHealth);
 
+        if (healthBarFill != null)
+        {
+            healthBarFill.fillAmount = currentHealth / maxHealth;
+        }
+
         // KIỂM TRA MÁU TRƯỚC KHI KÍCH HOẠT ANIMATION
         if (currentHealth <= 0)      
         {
+            if (healthBarFill != null)
+            {
+                healthBarFill.transform.parent.gameObject.SetActive(false); // Ẩn BG và Fill
+            }
             // Nếu chết: Chỉ gọi Die() (trong Die đã chứa lệnh phát animation death)
             Die();
         }
