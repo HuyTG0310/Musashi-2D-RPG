@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class EnemyBase : MonoBehaviour
 {
@@ -16,13 +17,15 @@ public class EnemyBase : MonoBehaviour
 
     protected Player playerScript;  // script để gọi hàm gây sát thương lên player
     protected Transform player;   // lưu vị trí của player để quái di chuyển theo tấn công
-
+    private SpriteRenderer spriteRenderer;
 
     [Header("Audio Settings")]
     protected AudioManager audioManager;
     public AudioClip hurtSound;
     public AudioClip deathSound;
 
+    [Header("UI Settings")]
+    public Image healthBarFill;
 
     protected virtual void Start()
     {
@@ -36,6 +39,7 @@ public class EnemyBase : MonoBehaviour
         {
             player = playerScript.gameObject.transform;     // tham chiếu đến component transform của player
         }
+        spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
 
@@ -53,9 +57,18 @@ public class EnemyBase : MonoBehaviour
         currentHealth -= actualDamage;      // trừ máu
         Debug.Log(gameObject.name + " mất " + actualDamage + "hp! còn lại: " + currentHealth);
 
+        if (healthBarFill != null)
+        {
+            healthBarFill.fillAmount = currentHealth / maxHealth;
+        }
+
         // KIỂM TRA MÁU TRƯỚC KHI KÍCH HOẠT ANIMATION
         if (currentHealth <= 0)      
         {
+            if (healthBarFill != null)
+            {
+                healthBarFill.transform.parent.gameObject.SetActive(false); // Ẩn BG và Fill
+            }
             // Nếu chết: Chỉ gọi Die() (trong Die đã chứa lệnh phát animation death)
             Die();
         }
@@ -63,6 +76,7 @@ public class EnemyBase : MonoBehaviour
         {
             // Nếu còn sống: Chỉ chạy animation hurt và phát âm thanh hurt
             anim.SetTrigger("hurt");
+            StartCoroutine(FlashRedRoutine());
         }
     }
 
@@ -95,4 +109,12 @@ public class EnemyBase : MonoBehaviour
         }
     }
 
+
+    private IEnumerator FlashRedRoutine()
+    {
+        // đổi màu enemy sang đỏ trong 0.1s rồi trả lại màu gốc
+        spriteRenderer.color = Color.red;
+        yield return new WaitForSeconds(0.1f);
+        spriteRenderer.color = Color.white;
+    }
 }
