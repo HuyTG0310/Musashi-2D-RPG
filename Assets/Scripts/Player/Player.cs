@@ -184,12 +184,19 @@ public class Player : MonoBehaviour
 
         Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(attackPoint.position, attackRange, enemyLayer);
 
+        // Phao cứu sinh: Nếu layer bị gán thiếu, tự động quét tìm quái có script EnemyBase
+        if (hitEnemies == null || hitEnemies.Length == 0)
+        {
+            hitEnemies = Physics2D.OverlapCircleAll(attackPoint.position, attackRange);
+        }
+
         foreach (Collider2D enemyCollider in hitEnemies)
         {
-            EnemyBase enemyScript = enemyCollider.gameObject.GetComponent<EnemyBase>();     // thông qua component lấy gameobject rồi lấy tiếp component
-            if (enemyScript != null)
+            EnemyBase enemyScript = enemyCollider.gameObject.GetComponentInParent<EnemyBase>();
+            if (enemyScript != null && enemyScript.currentHealth > 0)
             {
                 enemyScript.TakeDamage(attackDamage);
+                Debug.Log("Musashi hit " + enemyScript.gameObject.name + " for " + attackDamage + " damage!");
             }
         }
     }
