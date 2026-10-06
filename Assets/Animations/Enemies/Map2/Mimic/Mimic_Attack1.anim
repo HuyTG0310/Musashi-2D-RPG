@@ -20,7 +20,7 @@ AnimationClip:
   m_PPtrCurves:
   - serializedVersion: 2
     curve:
-    - time: 0.0
+    - time: 0
       value: {fileID: 91054475, guid: 875cb0e269134a0439c069f64f52e655, type: 3}
     - time: 0.1
       value: {fileID: 611161863, guid: 875cb0e269134a0439c069f64f52e655, type: 3}
@@ -40,7 +40,7 @@ AnimationClip:
       value: {fileID: -1830504905, guid: 875cb0e269134a0439c069f64f52e655, type: 3}
     - time: 0.9
       value: {fileID: -807597597, guid: 875cb0e269134a0439c069f64f52e655, type: 3}
-    - time: 1.0
+    - time: 1
       value: {fileID: -93922489, guid: 875cb0e269134a0439c069f64f52e655, type: 3}
     - time: 1.1
       value: {fileID: 1756274903, guid: 875cb0e269134a0439c069f64f52e655, type: 3}
@@ -64,7 +64,7 @@ AnimationClip:
       path: 0
       attribute: 0
       script: {fileID: 0}
-      classID: 212
+      typeID: 212
       customType: 23
       isPPtrCurve: 1
       isIntCurve: 0
@@ -117,7 +117,7 @@ AnimationClip:
     intParameter: 0
     messageOptions: 0
   - time: 0.4
-    functionName: TriggerAttackSound
+    functionName: DealDamageToPlayer
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
