@@ -189,6 +189,16 @@ namespace Assets.Scripts.Enemies.Map2
             if (rb != null) rb.velocity = Vector2.zero;
             if (anim != null) anim.SetBool("isRunning", false);
 
+            float xDiff = player.position.x - transform.position.x;
+            if (xDiff > 0.1f && !facingRight)
+            {
+                Flip();
+            }
+            else if (xDiff < -0.1f && facingRight)
+            {
+                Flip();
+            }
+
             if (Time.time >= lastAttackTime + attackCooldown)
             {
                 hasDealtDamageThisAttack = false;
@@ -196,7 +206,6 @@ namespace Assets.Scripts.Enemies.Map2
                 if (anim != null)
                 {
                     anim.SetTrigger("attack" + attackCombo);
-                    anim.SetTrigger("attack1");
                 }
                 lastAttackTime = Time.time;
                 Debug.Log("Mimic attacking Musashi!");
