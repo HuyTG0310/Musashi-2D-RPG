@@ -31,7 +31,7 @@ namespace Assets.Scripts.Enemies.Map1
         {
             base.Start();
             facingRight = true;
-            float randomOffset = Random.Range(-0.5f, 0.5f);
+            float randomOffset = Random.Range(-2f, 2f);
             moveSpeed += randomOffset;
         }
 
