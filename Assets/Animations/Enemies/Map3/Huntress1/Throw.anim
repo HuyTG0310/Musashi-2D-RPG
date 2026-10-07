@@ -6,7 +6,7 @@ AnimationClip:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: spear
+  m_Name: Throw
   serializedVersion: 7
   m_Legacy: 0
   m_Compressed: 0
@@ -22,15 +22,15 @@ AnimationClip:
     curve:
     - time: 0
       value: {fileID: 930155626, guid: 7ce24822c7b277842bb880eedf7f5b4a, type: 3}
-    - time: 0.11666667
+    - time: 0.1
       value: {fileID: -1392223721, guid: 7ce24822c7b277842bb880eedf7f5b4a, type: 3}
-    - time: 0.21666667
+    - time: 0.23333333
       value: {fileID: 1822831620, guid: 7ce24822c7b277842bb880eedf7f5b4a, type: 3}
     - time: 0.33333334
       value: {fileID: -1262949044, guid: 7ce24822c7b277842bb880eedf7f5b4a, type: 3}
-    - time: 0.45
+    - time: 0.43333334
       value: {fileID: 1423527719, guid: 7ce24822c7b277842bb880eedf7f5b4a, type: 3}
-    - time: 0.55
+    - time: 0.56666666
       value: {fileID: -494638146, guid: 7ce24822c7b277842bb880eedf7f5b4a, type: 3}
     - time: 0.6666667
       value: {fileID: -708159401, guid: 7ce24822c7b277842bb880eedf7f5b4a, type: 3}
@@ -87,4 +87,18 @@ AnimationClip:
   m_EulerEditorCurves: []
   m_HasGenericRootTransform: 0
   m_HasMotionFloatCurves: 0
-  m_Events: []
+  m_Events:
+  - time: 0.6666667
+    functionName: EndAction
+    data: 
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
+  - time: 0.6666667
+    functionName: ThrowSpearEvent
+    data: 
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
