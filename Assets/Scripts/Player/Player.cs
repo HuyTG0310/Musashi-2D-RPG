@@ -102,7 +102,7 @@ public class Player : MonoBehaviour
         }
 
         // 2. nhận phím tấn công (J)
-        if (Input.GetKeyDown(KeyCode.J) && isGrounded && !isRunning)
+        if (Input.GetKeyDown(KeyCode.J) && isGrounded)
         {
             OnClick();
         }
@@ -301,7 +301,7 @@ public class Player : MonoBehaviour
 
     private void UpdateStaminahUI()
     {
-        if (hpFillImage != null)
+        if (spFillImage != null)
         {
             spFillImage.fillAmount = currentStamina / maxStamina;
         }
