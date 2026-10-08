@@ -2,16 +2,14 @@
 
 namespace Assets.Scripts.Enemies.Map3
 {
-    // Phiên bản CHỈ CẬN CHIẾN (chưa có ném spear).
-    // Combo 2 đòn liên tiếp: Any State -> attack1 -> attack2 -> Idle (Animator tự nối bằng Exit Time).
-    // Phần ném spear sẽ làm riêng sau, xem file SpearThrower.cs.
+    // Melee combo (attack1 -> attack2) + ném spear (qua SpearThrower).
     public class Huntress1 : EnemyBase
     {
         [Header("Huntress1 Ranges")]
         public float chaseRange = 8f;    // tầm phát hiện + đuổi theo player
         public float meleeRange = 1.3f;  // player trong khoảng này thì chuyển sang combo cận chiến
 
-        // đang thực hiện combo cận chiến thì không làm gì khác
+        // đang thực hiện combo / ném spear thì không làm gì khác
         private bool isBusy = false;
 
         [Header("Huntress1 Movement")]
@@ -28,13 +26,16 @@ namespace Assets.Scripts.Enemies.Map3
         public float meleeRadius = 0.6f;
         public float meleeDamageHit1 = 10f;
         public float meleeDamageHit2 = 15f;
-        public float meleeCooldown = 2f;  // hồi chiêu giữa 2 lần bắt đầu combo (không phải giữa attack1 và attack2 trong 1 lần đánh)
+        public float meleeCooldown = 2f;
         public float lastMeleeTime;
 
         public LayerMask playerLayer;
 
         [Header("Huntress1 Sounds")]
         public AudioClip meleeSound;
+
+        // ném spear (component riêng, có thể để trống nếu không muốn ném)
+        private SpearThrower spearThrower;
 
 
         protected override void Start()
@@ -44,17 +45,14 @@ namespace Assets.Scripts.Enemies.Map3
             float randomOffset = Random.Range(-0.5f, 0.5f);
             moveSpeed += randomOffset;
             startPosition = transform.position;
+            spearThrower = GetComponent<SpearThrower>();
         }
 
 
         void FixedUpdate()
         {
-            //if (isDead || currentHealth <= 0 || player == null)
-            //{
-            //    return;
-            //}
+            if (player == null || playerScript == null) return;
 
-            // đang thực hiện combo thì đứng yên, không xét lại trạng thái khác
             if (isBusy)
             {
                 rb.velocity = Vector2.zero;
@@ -72,6 +70,10 @@ namespace Assets.Scripts.Enemies.Map3
             if (distanceToPlayer <= meleeRange)
             {
                 MeleeAttack();
+            }
+            else if (spearThrower != null && distanceToPlayer <= chaseRange && spearThrower.CanThrow(distanceToPlayer))
+            {
+                ThrowAttack();
             }
             else if (distanceToPlayer <= chaseRange)
             {
@@ -165,21 +167,18 @@ namespace Assets.Scripts.Enemies.Map3
             if (Time.time >= lastMeleeTime + meleeCooldown)
             {
                 isBusy = true;
-
-                // chỉ cần bắn trigger attack1 để khởi động combo,
-                // Animator sẽ tự động nối tiếp attack1 -> attack2 (Exit Time, không cần code can thiệp)
                 anim.SetTrigger("attack1");
                 lastMeleeTime = Time.time;
             }
         }
 
-        // Gọi bằng Animation Event tại đúng frame của clip attack1 lúc vũ khí chạm player
+        // Animation Event tại frame trúng đòn của clip attack1
         public void DealMeleeDamage1()
         {
             DealMeleeDamage(meleeDamageHit1);
         }
 
-        // Gọi bằng Animation Event tại đúng frame của clip attack2 lúc vũ khí chạm player
+        // Animation Event tại frame trúng đòn của clip attack2
         public void DealMeleeDamage2()
         {
             DealMeleeDamage(meleeDamageHit2);
@@ -207,7 +206,23 @@ namespace Assets.Scripts.Enemies.Map3
         }
 
 
-        // Gọi bằng Animation Event ở frame cuối cùng của clip attack2 (kết thúc combo)
+        // =========================================================
+        // NÉM SPEAR (logic tạo spear nằm trong SpearThrower)
+        // =========================================================
+
+        private void ThrowAttack()
+        {
+            rb.velocity = Vector2.zero;
+            anim.SetBool("isRunning", false);
+            FaceTowardsPlayer();
+
+            isBusy = true;
+            spearThrower.MarkThrown();
+            anim.SetTrigger("throw");
+        }
+
+
+        // Animation Event ở frame cuối của clip attack2 VÀ clip throw (kết thúc hành động)
         public void EndAction()
         {
             isBusy = false;
