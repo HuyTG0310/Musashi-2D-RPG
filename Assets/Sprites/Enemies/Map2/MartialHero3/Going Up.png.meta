@@ -113,12 +113,12 @@ TextureImporter:
       name: Going Up_0
       rect:
         serializedVersion: 2
-        x: 49
-        y: 30
-        width: 36
-        height: 51
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        x: 0
+        y: 0
+        width: 126
+        height: 126
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -134,12 +134,12 @@ TextureImporter:
       name: Going Up_1
       rect:
         serializedVersion: 2
-        x: 175
-        y: 30
-        width: 36
-        height: 51
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        x: 126
+        y: 0
+        width: 126
+        height: 126
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -155,12 +155,12 @@ TextureImporter:
       name: Going Up_2
       rect:
         serializedVersion: 2
-        x: 301
-        y: 30
-        width: 36
-        height: 51
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        x: 252
+        y: 0
+        width: 126
+        height: 126
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
