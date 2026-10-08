@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 8320905921855658487}
   - component: {fileID: 7912205674785210428}
   - component: {fileID: 8630810506637123209}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Spear
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -174,9 +174,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   groundLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 256
   lifeTime: 5
   stuckLifeTime: 3
+  useHitAnimation: 0
+  hitAnimDuration: 0.4
 --- !u!95 &8630810506637123209
 Animator:
   serializedVersion: 5
