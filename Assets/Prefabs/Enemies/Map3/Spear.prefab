@@ -174,11 +174,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   groundLayer:
     serializedVersion: 2
-<<<<<<< HEAD
-    m_Bits: 64
-=======
-    m_Bits: 256
->>>>>>> a37e1c0eb36f073edaf1e3ecd9604e993641181e
+
   lifeTime: 5
   stuckLifeTime: 3
   useHitAnimation: 0
