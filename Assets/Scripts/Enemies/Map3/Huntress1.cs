@@ -2,64 +2,128 @@
 
 namespace Assets.Scripts.Enemies.Map3
 {
-    // Melee combo (attack1 -> attack2) + ném spear (qua SpearThrower).
+    // Huntress1:
+    // - Detect Player
+    // - Chase Player until spear range
+    // - Stop and throw spear
+    // - Stay in spear range while spear is on cooldown
+    // - Switch to melee when Player gets close
+    // - Melee combo: attack1 -> attack2
     public class Huntress1 : EnemyBase
     {
         [Header("Huntress1 Ranges")]
-        public float chaseRange = 8f;    // tầm phát hiện + đuổi theo player
-        public float meleeRange = 1.3f;  // player trong khoảng này thì chuyển sang combo cận chiến
+        public float detectionRange = 12f; // Tầm phát hiện Player
+        public float spearRange = 10f;      // Tầm bắt đầu ném spear
+        public float meleeRange = 1.5f;    // Tầm đánh cận chiến
 
-        // đang thực hiện combo / ném spear thì không làm gì khác
+        // Đang thực hiện melee combo hoặc throw
         private bool isBusy = false;
+
 
         [Header("Huntress1 Movement")]
         public bool facingRight = true;
         public Transform groundCheck;
         public LayerMask groundLayer;
         public float patrolDistance = 3f;
+
+        // Vị trí spawn ban đầu
         private Vector3 startPosition;
+
 
         [Header("Huntress1 Attack Point")]
         public Transform attackPoint;
 
-        [Header("Huntress1 Melee (2 đòn liên tiếp: attack1 -> attack2)")]
+
+        [Header("Huntress1 Melee")]
         public float meleeRadius = 0.6f;
+
+        // Damage đòn 1
         public float meleeDamageHit1 = 10f;
+
+        // Damage đòn 2
         public float meleeDamageHit2 = 15f;
+
+        // Cooldown giữa các combo
         public float meleeCooldown = 2f;
+
+        // Thời điểm melee gần nhất
         public float lastMeleeTime;
 
+        // Layer của Player
         public LayerMask playerLayer;
+
 
         [Header("Huntress1 Sounds")]
         public AudioClip meleeSound;
 
-        // ném spear (component riêng, có thể để trống nếu không muốn ném)
+
+        // Component xử lý việc ném spear
         private SpearThrower spearThrower;
 
+
+        // =========================================================
+        // START
+        // =========================================================
 
         protected override void Start()
         {
             base.Start();
+
+            // Mặc định quay sang phải
             facingRight = true;
-            float randomOffset = Random.Range(-0.5f, 0.5f);
+
+            // Random tốc độ một chút
+            float randomOffset =
+                Random.Range(-0.5f, 0.5f);
+
             moveSpeed += randomOffset;
+
+            // Lưu vị trí spawn
             startPosition = transform.position;
-            spearThrower = GetComponent<SpearThrower>();
+
+            // Lấy component SpearThrower
+            spearThrower =
+                GetComponent<SpearThrower>();
         }
 
 
+        // =========================================================
+        // FIXED UPDATE
+        // =========================================================
+
         void FixedUpdate()
         {
-            if (player == null || playerScript == null) return;
+            // Không có Player
+            if (player == null || playerScript == null)
+                return;
 
+
+            // =====================================================
+            // ĐANG ATTACK / THROW
+            // =====================================================
+
+            // Không được di chuyển khi đang thực hiện animation
             if (isBusy)
             {
                 rb.velocity = Vector2.zero;
                 return;
             }
 
-            float distanceToPlayer = Vector2.Distance(transform.position, player.position);
+
+            // =====================================================
+            // TÍNH KHOẢNG CÁCH
+            // =====================================================
+
+            float distanceToPlayer =
+                Vector2.Distance(
+                    transform.position,
+                    player.position
+                );
+
+
+            // =====================================================
+            // PLAYER CHẾT
+            // =====================================================
 
             if (playerScript.currentHealth <= 0)
             {
@@ -67,39 +131,122 @@ namespace Assets.Scripts.Enemies.Map3
                 return;
             }
 
+
+            // =====================================================
+            // 1. MELEE RANGE
+            // =====================================================
+
+            // Player ở rất gần
+            // => ưu tiên melee
             if (distanceToPlayer <= meleeRange)
             {
                 MeleeAttack();
+                return;
             }
-            else if (spearThrower != null && distanceToPlayer <= chaseRange && spearThrower.CanThrow(distanceToPlayer))
+
+
+            // =====================================================
+            // 2. SPEAR RANGE
+            // =====================================================
+
+            // Player nằm trong tầm ném
+            //
+            // Huntress sẽ:
+            // - Đứng yên
+            // - Quay mặt về Player
+            // - Ném khi spear sẵn sàng
+            // - Không chạy khi spear đang cooldown
+            else if (distanceToPlayer <= spearRange)
             {
-                ThrowAttack();
+                // Đứng yên
+                rb.velocity = Vector2.zero;
+
+                // Tắt animation chạy
+                anim.SetBool("isRunning", false);
+
+                // Quay mặt về Player
+                FaceTowardsPlayer();
+
+
+                // Nếu có SpearThrower
+                if (spearThrower != null)
+                {
+                    // Chỉ ném khi spear sẵn sàng
+                    if (spearThrower.CanThrow(distanceToPlayer))
+                    {
+                        ThrowAttack();
+                    }
+                }
+
+                return;
             }
-            else if (distanceToPlayer <= chaseRange)
+
+
+            // =====================================================
+            // 3. DETECTION / CHASE RANGE
+            // =====================================================
+
+            // Player đã bị phát hiện
+            // nhưng vẫn còn quá xa để ném spear
+            else if (distanceToPlayer <= detectionRange)
             {
                 ChasePlayer();
+                return;
             }
-            else
-            {
-                Patrol();
-            }
+
+
+            // =====================================================
+            // 4. PATROL
+            // =====================================================
+
+            // Player ngoài tầm phát hiện
+            Patrol();
         }
 
+
+        // =========================================================
+        // FLIP
+        // =========================================================
 
         private void Flip()
         {
+            // Đảo hướng
             facingRight = !facingRight;
-            transform.localScale = new Vector3(-transform.localScale.x, 1, 1);
+
+            // Giữ nguyên scale Y và Z
+            transform.localScale =
+                new Vector3(
+                    -transform.localScale.x,
+                    transform.localScale.y,
+                    transform.localScale.z
+                );
         }
 
 
+        // =========================================================
+        // FACE TOWARDS PLAYER
+        // =========================================================
+
         private void FaceTowardsPlayer()
         {
-            float xDifference = player.position.x - transform.position.x;
+            if (player == null)
+                return;
+
+
+            // Tính khoảng cách theo trục X
+            float xDifference =
+                player.position.x -
+                transform.position.x;
+
+
+            // Player ở bên phải
             if (xDifference > 0 && !facingRight)
             {
                 Flip();
             }
+
+
+            // Player ở bên trái
             else if (xDifference < 0 && facingRight)
             {
                 Flip();
@@ -107,23 +254,67 @@ namespace Assets.Scripts.Enemies.Map3
         }
 
 
+        // =========================================================
+        // PATROL
+        // =========================================================
+
         private void Patrol()
         {
+            // Bật animation chạy
             anim.SetBool("isRunning", true);
 
-            float direction = facingRight ? 1f : -1f;
-            rb.velocity = new Vector2(direction * moveSpeed, rb.velocity.y);
 
-            if (transform.position.x >= startPosition.x + patrolDistance && facingRight)
+            // Xác định hướng
+            float direction =
+                facingRight ? 1f : -1f;
+
+
+            // Di chuyển
+            rb.velocity =
+                new Vector2(
+                    direction * moveSpeed,
+                    rb.velocity.y
+                );
+
+
+            // =====================================================
+            // PATROL RIGHT LIMIT
+            // =====================================================
+
+            if (transform.position.x >=
+                startPosition.x + patrolDistance &&
+                facingRight)
             {
                 Flip();
             }
-            else if (transform.position.x <= startPosition.x - patrolDistance && !facingRight)
+
+
+            // =====================================================
+            // PATROL LEFT LIMIT
+            // =====================================================
+
+            else if (transform.position.x <=
+                     startPosition.x - patrolDistance &&
+                     !facingRight)
             {
                 Flip();
             }
 
-            bool isGrounded = Physics2D.OverlapCircle(groundCheck.position, 0.2f, groundLayer);
+
+            // =====================================================
+            // GROUND CHECK
+            // =====================================================
+
+            bool isGrounded =
+                Physics2D.OverlapCircle(
+                    groundCheck.position,
+                    0.2f,
+                    groundLayer
+                );
+
+
+            // Nếu không còn đứng trên mặt đất
+            // thì quay đầu
             if (!isGrounded)
             {
                 Flip();
@@ -131,116 +322,308 @@ namespace Assets.Scripts.Enemies.Map3
         }
 
 
+        // =========================================================
+        // CHASE PLAYER
+        // =========================================================
+
         private void ChasePlayer()
         {
+            // Bật animation chạy
             anim.SetBool("isRunning", true);
 
+
+            // Khoảng chết để tránh Flip liên tục
             float flipDeadzone = 0.15f;
-            float xDifference = player.position.x - transform.position.x;
 
-            if (xDifference > flipDeadzone && !facingRight)
+
+            // Khoảng cách theo trục X
+            float xDifference =
+                player.position.x -
+                transform.position.x;
+
+
+            // =====================================================
+            // PLAYER BÊN PHẢI
+            // =====================================================
+
+            if (xDifference > flipDeadzone &&
+                !facingRight)
             {
                 Flip();
             }
-            else if (xDifference < -flipDeadzone && facingRight)
+
+
+            // =====================================================
+            // PLAYER BÊN TRÁI
+            // =====================================================
+
+            else if (xDifference < -flipDeadzone &&
+                     facingRight)
             {
                 Flip();
             }
 
-            float moveDirection = facingRight ? 1f : -1f;
-            rb.velocity = new Vector2(moveDirection * moveSpeed, rb.velocity.y);
+
+            // =====================================================
+            // DI CHUYỂN
+            // =====================================================
+
+            float moveDirection =
+                facingRight ? 1f : -1f;
+
+
+            rb.velocity =
+                new Vector2(
+                    moveDirection * moveSpeed,
+                    rb.velocity.y
+                );
         }
 
 
         // =========================================================
-        // MELEE COMBO (attack1 -> attack2 liên tiếp)
+        // MELEE COMBO
         // =========================================================
 
         private void MeleeAttack()
         {
+            // Đứng yên
             rb.velocity = Vector2.zero;
+
+
+            // Tắt animation chạy
             anim.SetBool("isRunning", false);
+
+
+            // Quay mặt về Player
             FaceTowardsPlayer();
 
-            if (isBusy) return;
 
-            if (Time.time >= lastMeleeTime + meleeCooldown)
+            // Nếu đang attack thì không attack tiếp
+            if (isBusy)
+                return;
+
+
+            // Kiểm tra cooldown
+            if (Time.time >=
+                lastMeleeTime + meleeCooldown)
             {
+                // Đánh dấu đang bận
                 isBusy = true;
+
+
+                // Bắt đầu combo
                 anim.SetTrigger("attack1");
+
+
+                // Lưu thời điểm attack
                 lastMeleeTime = Time.time;
             }
         }
 
-        // Animation Event tại frame trúng đòn của clip attack1
+
+        // =========================================================
+        // MELEE DAMAGE 1
+        // =========================================================
+
+        // Animation Event trong attack1
         public void DealMeleeDamage1()
         {
-            DealMeleeDamage(meleeDamageHit1);
+            // Chỉ gây damage khi đang thực sự attack
+            if (!isBusy)
+                return;
+
+
+            DealMeleeDamage(
+                meleeDamageHit1
+            );
         }
 
-        // Animation Event tại frame trúng đòn của clip attack2
+
+        // =========================================================
+        // MELEE DAMAGE 2
+        // =========================================================
+
+        // Animation Event trong attack2
         public void DealMeleeDamage2()
         {
-            DealMeleeDamage(meleeDamageHit2);
+            // Chỉ gây damage khi đang thực sự attack
+            if (!isBusy)
+                return;
+
+
+            DealMeleeDamage(
+                meleeDamageHit2
+            );
         }
 
-        private void DealMeleeDamage(float damageAmount)
+
+        // =========================================================
+        // DEAL MELEE DAMAGE
+        // =========================================================
+
+        private void DealMeleeDamage(
+            float damageAmount
+        )
         {
-            Collider2D hitPlayer = Physics2D.OverlapCircle(attackPoint.position, meleeRadius, playerLayer);
-            if (hitPlayer != null)
+            // Kiểm tra AttackPoint
+            if (attackPoint == null)
             {
-                Player hitPlayerScript = hitPlayer.GetComponentInParent<Player>();
-                if (hitPlayerScript != null)
-                {
-                    hitPlayerScript.TakeDamage(damageAmount);
-                }
+                Debug.LogWarning(
+                    "Huntress1: AttackPoint chưa được gán!"
+                );
+
+                return;
+            }
+
+
+            // Tìm Player trong hitbox
+            Collider2D hitPlayer =
+                Physics2D.OverlapCircle(
+                    attackPoint.position,
+                    meleeRadius,
+                    playerLayer
+                );
+
+
+            // Không tìm thấy Player
+            if (hitPlayer == null)
+                return;
+
+
+            // Lấy Player component
+            Player hitPlayerScript =
+                hitPlayer.GetComponentInParent<Player>();
+
+
+            // Kiểm tra Player
+            if (hitPlayerScript != null &&
+                hitPlayerScript.currentHealth > 0)
+            {
+                hitPlayerScript.TakeDamage(
+                    damageAmount
+                );
             }
         }
+
+
+        // =========================================================
+        // MELEE SOUND
+        // =========================================================
 
         private void TriggerMeleeSound()
         {
             if (audioManager != null)
             {
-                audioManager.PlayerSFX(meleeSound);
+                audioManager.PlayerSFX(
+                    meleeSound
+                );
             }
         }
 
 
         // =========================================================
-        // NÉM SPEAR (logic tạo spear nằm trong SpearThrower)
+        // THROW SPEAR
         // =========================================================
 
         private void ThrowAttack()
         {
+            // Đứng yên
             rb.velocity = Vector2.zero;
+
+
+            // Tắt animation chạy
             anim.SetBool("isRunning", false);
+
+
+            // Quay về phía Player
             FaceTowardsPlayer();
 
+
+            // Đánh dấu đang thực hiện throw
             isBusy = true;
+
+
+            // Báo SpearThrower đã ném
             spearThrower.MarkThrown();
+
+
+            // Trigger animation throw
             anim.SetTrigger("throw");
         }
 
 
-        // Animation Event ở frame cuối của clip attack2 VÀ clip throw (kết thúc hành động)
+        // =========================================================
+        // END ACTION
+        // =========================================================
+
+        // Animation Event:
+        // - Cuối attack2
+        // - Cuối throw
         public void EndAction()
         {
+            // Cho phép AI hoạt động lại
             isBusy = false;
         }
 
 
+        // =========================================================
+        // GIZMOS
+        // =========================================================
+
         private void OnDrawGizmosSelected()
         {
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawWireSphere(transform.position, meleeRange);
+            // =====================================================
+            // DETECTION RANGE
+            // =====================================================
 
+            // Màu xanh cyan
             Gizmos.color = Color.cyan;
-            Gizmos.DrawWireSphere(transform.position, chaseRange);
+
+            Gizmos.DrawWireSphere(
+                transform.position,
+                detectionRange
+            );
+
+
+            // =====================================================
+            // SPEAR RANGE
+            // =====================================================
+
+            // Màu xanh lá
+            Gizmos.color = Color.green;
+
+            Gizmos.DrawWireSphere(
+                transform.position,
+                spearRange
+            );
+
+
+            // =====================================================
+            // MELEE RANGE
+            // =====================================================
+
+            // Màu vàng
+            Gizmos.color = Color.yellow;
+
+            Gizmos.DrawWireSphere(
+                transform.position,
+                meleeRange
+            );
+
+
+            // =====================================================
+            // MELEE HITBOX
+            // =====================================================
 
             if (attackPoint != null)
             {
+                // Màu đỏ
                 Gizmos.color = Color.red;
-                Gizmos.DrawWireSphere(attackPoint.position, meleeRadius);
+
+                Gizmos.DrawWireSphere(
+                    attackPoint.position,
+                    meleeRadius
+                );
             }
         }
     }
