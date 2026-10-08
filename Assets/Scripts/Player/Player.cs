@@ -65,6 +65,10 @@ public class Player : MonoBehaviour
     private bool isDefending;
     public Image spFillImage;
 
+
+    [Header("Inventory")]
+    public int coins = 0;
+
     private void Start()
     {
         facingRight = true;
@@ -458,5 +462,12 @@ public class Player : MonoBehaviour
     public void SpawnShuriken()
     {
         Instantiate(shurikenPrefab, firePoint.position, firePoint.rotation);
+    }
+
+    public void AddCoin(int amount)
+    {
+        coins += amount;
+        Debug.Log("Đã nhặt xu! Tổng tiền hiện tại: " + coins);
+        // Sau này bạn có thể thêm code update UI Text số tiền ở đây
     }
 }

@@ -27,6 +27,12 @@ public class EnemyBase : MonoBehaviour
     [Header("UI Settings")]
     public Image healthBarFill;
 
+
+    [Header("Drop Items")]
+    public GameObject coinPrefab; // Kéo thả Prefab Coin vào đây trên Inspector
+    public int minCoins = 1;      // Rớt tối thiểu mấy xu
+    public int maxCoins = 3;      // Rớt tối đa mấy xu
+
     protected virtual void Start()
     {
         currentHealth = maxHealth;
@@ -89,6 +95,7 @@ public class EnemyBase : MonoBehaviour
         this.enabled = false;   // tắt script này
         rb.gravityScale = 0;    // tắt trọng lực để ko rơi xuống
         rb.velocity = Vector2.zero;     // vận tốc về 0 để enemy nằm im ko di chuyển
+        DropCoins();
         Destroy(this.gameObject, 2f);   // xóa game object này sau 2s
     }
 
@@ -117,4 +124,33 @@ public class EnemyBase : MonoBehaviour
         yield return new WaitForSeconds(0.1f);
         spriteRenderer.color = Color.white;
     }
+
+
+    private void DropCoins()
+    {
+        // Nếu bạn chưa kéo Prefab vào thì thoát hàm để tránh lỗi
+        if (coinPrefab == null) return;
+
+        // Random số lượng xu văng ra từ min đến max
+        int dropCount = Random.Range(minCoins, maxCoins + 1);
+
+        for (int i = 0; i < dropCount; i++)
+        {
+            // Sinh ra đồng xu ngay tại vị trí quái vật chết
+            GameObject coin = Instantiate(coinPrefab, transform.position, Quaternion.identity);
+
+            // Bổ sung lực nảy vật lý để xu "văng tung tóe"
+            Rigidbody2D coinRb = coin.GetComponent<Rigidbody2D>();
+            if (coinRb != null)
+            {
+                // Lực X random trái/phải, lực Y bắn vòng cung lên trời
+                float randomForceX = Random.Range(-3f, 3f);
+                float randomForceY = Random.Range(4f, 7f);
+
+                // ForceMode2D.Impulse giống như bị búng mạnh 1 phát
+                coinRb.AddForce(new Vector2(randomForceX, randomForceY), ForceMode2D.Impulse);
+            }
+        }
+    }
+
 }

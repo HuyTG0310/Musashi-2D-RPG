@@ -15,6 +15,10 @@ public class Shuriken : MonoBehaviour
     private Rigidbody2D rb;
     private Player player;
 
+    [Header("Audio Settings")]
+    private AudioManager audioManager;
+    public AudioClip hitSound;
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -25,6 +29,8 @@ public class Shuriken : MonoBehaviour
 
         // Bổ sung: Tự động hủy phi tiêu sau vài giây để khỏi bị rác bộ nhớ
         Destroy(gameObject, lifetime);
+
+        audioManager = FindAnyObjectByType<AudioManager>();
     }
 
     void Update()
@@ -53,6 +59,7 @@ public class Shuriken : MonoBehaviour
         EnemyBase enemy = collision.GetComponent<EnemyBase>();
         if (enemy != null)
         {
+            audioManager.PlayerSFX(hitSound);
             enemy.TakeDamage(damage); // Gọi hàm trừ máu
             Explode();                // Phi tiêu biến mất
             return;
