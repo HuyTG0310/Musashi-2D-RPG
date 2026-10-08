@@ -33,6 +33,7 @@ namespace Assets.Scripts.Enemies.Map3
         [Header("MartialHero2 Sounds")]
         public AudioClip attack1Sound;
         public AudioClip attack2Sound;
+        private bool isAttacking = false;
 
         protected override void Start()
         {
@@ -52,20 +53,66 @@ namespace Assets.Scripts.Enemies.Map3
                 return;
             }
 
-            // tính khoảng cách đến player
-            float distanceToPlayer = Vector2.Distance(transform.position, player.position);
+            // =====================================================
+            // ĐANG ATTACK
+            // =====================================================
 
-            // nếu trong vùng tấn công và player còn sống
-            if (distanceToPlayer <= attackRange && playerScript.currentHealth > 0)
+            // Trong toàn bộ combo Attack1 -> Attack2:
+            // tuyệt đối không di chuyển theo Player
+            if (isAttacking)
+            {
+                rb.velocity = Vector2.zero;
+                anim.SetBool("isRunning", false);
+                return;
+            }
+
+
+            // =====================================================
+            // TÍNH KHOẢNG CÁCH
+            // =====================================================
+
+            float distanceToPlayer =
+                Vector2.Distance(
+                    transform.position,
+                    player.position
+                );
+
+
+            // =====================================================
+            // PLAYER CÒN SỐNG
+            // =====================================================
+
+            if (playerScript.currentHealth <= 0)
+            {
+                Patrol();
+                return;
+            }
+
+
+            // =====================================================
+            // ATTACK
+            // =====================================================
+
+            if (distanceToPlayer <= attackRange)
             {
                 AttackPlayer();
             }
-            // nếu nằm trong khoảng đuổi theo player và player còn sống
-            else if (distanceToPlayer <= chaseRange && playerScript.currentHealth > 0)
+
+
+            // =====================================================
+            // CHASE
+            // =====================================================
+
+            else if (distanceToPlayer <= chaseRange)
             {
                 ChasePlayer();
             }
-            // còn lại nằm ngoài vùng hoặc player chết thì đi tuần
+
+
+            // =====================================================
+            // PATROL
+            // =====================================================
+
             else
             {
                 Patrol();
@@ -76,7 +123,7 @@ namespace Assets.Scripts.Enemies.Map3
         private void Flip()
         {
             facingRight = !facingRight;
-            transform.localScale = new Vector3(-transform.localScale.x, 1, 1);
+            transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, 1);
         }
 
         // method đi tuần tra trong 1 khoảng cách cố định quanh điểm spawn
@@ -135,21 +182,33 @@ namespace Assets.Scripts.Enemies.Map3
         // hàm kích hoạt animation tấn công player, chọn đòn nhẹ hoặc đòn mạnh
         private void AttackPlayer()
         {
-            // lập tức đứng yên ko di chuyển
             rb.velocity = Vector2.zero;
             anim.SetBool("isRunning", false);
 
-            // đủ thời gian hồi chiêu thì tấn công (lastAttackTime chỉ được cập nhật ở đây,
-            // không hề bị TakeDamage/hurt đụng vào, nên dù bị player đánh liên tục,
-            // thời gian hồi chiêu vẫn đếm liên tục không bị ngắt/reset)
+            // Quay mặt về Player
+            float xDifference =
+                player.position.x - transform.position.x;
+
+            if (xDifference > 0 && !facingRight)
+            {
+                Flip();
+            }
+            else if (xDifference < 0 && facingRight)
+            {
+                Flip();
+            }
+
+            // Chỉ bắt đầu trạng thái attack khi thực sự trigger animation
             if (Time.time >= lastAttackTime + attackCooldown)
             {
-                // chỉ cần bắn trigger attack1 để khởi động combo
-                // Animator sẽ tự động nối tiếp Atk1 -> Atk2 (không cần code can thiệp)
+                isAttacking = true;
+
                 anim.SetTrigger("attack1");
+
                 lastAttackTime = Time.time;
             }
         }
+        
 
         // được gọi trong animation Attack1 (đòn nhẹ) của MartialHero2
         public void DealDamageAttack1()
@@ -206,6 +265,10 @@ namespace Assets.Scripts.Enemies.Map3
             {
                 audioManager.PlayerSFX(attack2Sound);
             }
+        }
+        public void EndAttack()
+        {
+            isAttacking = false;
         }
     }
 }

@@ -91,8 +91,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4837224761221428924}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -40.86, y: 2.29, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: -41.6928, y: -0.0235, z: 0}
+  m_LocalScale: {x: 0.86670625, y: 0.6298507, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1999108050229603883}
@@ -178,7 +178,7 @@ Rigidbody2D:
   m_ExcludeLayers:
     serializedVersion: 2
     m_Bits: 0
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
@@ -214,7 +214,7 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: -0.16934586, y: -0.00488472}
+  m_Offset: {x: -0.16934586, y: -0.004884839}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -225,7 +225,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 2.14328, y: 3.5998068}
+  m_Size: {x: 2.14328, y: 3.5998065}
   m_EdgeRadius: 0
 --- !u!95 &8753787566259052644
 Animator:
@@ -267,15 +267,18 @@ MonoBehaviour:
   hurtSound: {fileID: 0}
   deathSound: {fileID: 0}
   healthBarFill: {fileID: 7337327049984948956}
+  coinPrefab: {fileID: 0}
+  minCoins: 1
+  maxCoins: 3
   chaseRange: 7
-  attackRange: 1.5
+  attackRange: 1.4
   attackCooldown: 3
   lastAttackTime: 0
   attack1Damage: 15
   attack1Radius: 1.8
   attackPoint1: {fileID: 1999108050229603883}
   attack2Damage: 35
-  attack2Radius: 1.8
+  attack2Radius: 1.4
   attackPoint2: {fileID: 9217911083565117053}
   playerLayer:
     serializedVersion: 2
