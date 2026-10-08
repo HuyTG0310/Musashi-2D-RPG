@@ -174,7 +174,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &117124981
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -194,6 +194,9 @@ MonoBehaviour:
   hurtSound: {fileID: 8300000, guid: 515b671c8a01ab4489a60e8fe21dfb32, type: 3}
   deathSound: {fileID: 8300000, guid: 9f87dc07a0201ec4bad07692b4e9fe88, type: 3}
   healthBarFill: {fileID: 0}
+  coinPrefab: {fileID: 0}
+  minCoins: 1
+  maxCoins: 3
   isAwake: 0
   wakeRange: 5
   chaseRange: 7
@@ -570,6 +573,9 @@ MonoBehaviour:
   hurtSound: {fileID: 8300000, guid: 515b671c8a01ab4489a60e8fe21dfb32, type: 3}
   deathSound: {fileID: 8300000, guid: 9f87dc07a0201ec4bad07692b4e9fe88, type: 3}
   healthBarFill: {fileID: 0}
+  coinPrefab: {fileID: 0}
+  minCoins: 1
+  maxCoins: 3
   chaseRange: 9
   attackRange: 7
   attackCooldown: 1.6
@@ -1172,7 +1178,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 859847755}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -2.03, y: 3.9811966, z: -10}
+  m_LocalPosition: {x: -2.0299885, y: 3.9811966, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1277,7 +1283,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!212 &862435144
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -1338,7 +1344,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 862435143}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -9.5, y: 1.1, z: 0}
+  m_LocalPosition: {x: -9.5, y: 2.24, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1390,6 +1396,9 @@ MonoBehaviour:
   hurtSound: {fileID: 8300000, guid: 515b671c8a01ab4489a60e8fe21dfb32, type: 3}
   deathSound: {fileID: 8300000, guid: 9f87dc07a0201ec4bad07692b4e9fe88, type: 3}
   healthBarFill: {fileID: 0}
+  coinPrefab: {fileID: 0}
+  minCoins: 1
+  maxCoins: 3
   chaseRange: 9
   attackRange: 2.98
   attackCooldown: 1.8
@@ -1447,8 +1456,8 @@ CapsuleCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: -0.21908903, y: 1.3805568}
-  m_Size: {x: 2.0927324, y: 2.851006}
+  m_Offset: {x: -0.12546301, y: 0.06978607}
+  m_Size: {x: 1.7012033, y: 2.4424539}
   m_Direction: 0
 --- !u!50 &862435149
 Rigidbody2D:
@@ -4677,7 +4686,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9073204902106438016, guid: dc09bce7d496f334ba69047fedfc4e9a, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
