@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 7682314789334980852}
   - component: {fileID: 3207662593452392067}
   - component: {fileID: 5505452811448477108}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Huntress2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -173,6 +173,9 @@ MonoBehaviour:
   hurtSound: {fileID: 8300000, guid: 515b671c8a01ab4489a60e8fe21dfb32, type: 3}
   deathSound: {fileID: 8300000, guid: 9f87dc07a0201ec4bad07692b4e9fe88, type: 3}
   healthBarFill: {fileID: 2784147213051401468}
+  coinPrefab: {fileID: 3969643675363155990, guid: 86a3a6a750e24a44e8c9875d32656394, type: 3}
+  minCoins: 2
+  maxCoins: 4
   chaseRange: 15
   attackRange: 7
   attackCooldown: 1.6
@@ -221,7 +224,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8225722601881229198}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: AttackPoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -252,7 +255,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1286958499265357957}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: GroundCheck
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -283,7 +286,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5723614341865576683}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: WallCheck
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -313,6 +316,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8940521321431729763}
     m_Modifications:
+    - target: {fileID: 1024650523910922862, guid: 423bc8775884729498cbdde8799017d8, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 4452836697531028428, guid: 423bc8775884729498cbdde8799017d8, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     - target: {fileID: 5008786476200938254, guid: 423bc8775884729498cbdde8799017d8, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -400,6 +411,10 @@ PrefabInstance:
     - target: {fileID: 5717916019667438014, guid: 423bc8775884729498cbdde8799017d8, type: 3}
       propertyPath: m_Name
       value: HealthBar
+      objectReference: {fileID: 0}
+    - target: {fileID: 5717916019667438014, guid: 423bc8775884729498cbdde8799017d8, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 8136583210180189212, guid: 423bc8775884729498cbdde8799017d8, type: 3}
       propertyPath: m_PresetInfoIsWorld
