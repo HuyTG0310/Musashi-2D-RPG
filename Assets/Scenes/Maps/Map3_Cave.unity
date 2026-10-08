@@ -179,6 +179,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: yellowNinja
       objectReference: {fileID: 0}
+    - target: {fileID: 8950274235413600502, guid: fcfc427eb09ceae4fae736819e7f7764, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -198,7 +202,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2220460133461093246, guid: 5f1faffd64f367d46906d81d27282a2e, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5685113453239547589, guid: 5f1faffd64f367d46906d81d27282a2e, type: 3}
       propertyPath: m_RootOrder
@@ -1669,7 +1673,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3550668723287402818, guid: b3be9912235e1c849afaafd9d0e76d56, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
