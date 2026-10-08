@@ -19,6 +19,13 @@ namespace Assets.Scripts.Enemies.Map2
             float absX = Mathf.Abs(transform.localScale.x);
             transform.localScale = new Vector3(movingRight ? absX : -absX, transform.localScale.y, transform.localScale.z);
 
+            rb = GetComponent<Rigidbody2D>();
+            if (rb != null)
+            {
+                float dir = movingRight ? 1f : -1f;
+                rb.velocity = new Vector2(dir * speed, 0);
+            }
+
             Destroy(gameObject, lifetime);
         }
 
@@ -46,6 +53,11 @@ namespace Assets.Scripts.Enemies.Map2
         {
             // Kiểm tra xem có trúng Musashi (Player) không
             Player player = collision.GetComponent<Player>();
+            if (player == null)
+            {
+                player = collision.GetComponentInParent<Player>();
+            }
+
             if (player != null)
             {
                 player.TakeDamage(damage);
@@ -54,7 +66,7 @@ namespace Assets.Scripts.Enemies.Map2
             }
 
             // Trúng mặt đất hoặc chướng ngại vật
-            if (collision.gameObject.layer == LayerMask.NameToLayer("Ground"))
+            if (collision.gameObject.layer == LayerMask.NameToLayer("Ground") || collision.CompareTag("Ground"))
             {
                 Destroy(gameObject);
             }
