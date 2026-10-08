@@ -14,7 +14,7 @@ TagManager:
   - Ground
   - Enemy
   - EnemyProjectile
-  - 
+  - Coin
   - 
   - 
   - 
@@ -58,4 +58,7 @@ TagManager:
     locked: 0
   - name: Enemy
     uniqueID: 2779991119
+    locked: 0
+  - name: Coin
+    uniqueID: 519018043
     locked: 0
