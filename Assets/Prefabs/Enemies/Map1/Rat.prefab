@@ -266,6 +266,9 @@ MonoBehaviour:
   hurtSound: {fileID: 0}
   deathSound: {fileID: 0}
   healthBarFill: {fileID: 842945771913269305}
+  coinPrefab: {fileID: 3969643675363155990, guid: 86a3a6a750e24a44e8c9875d32656394, type: 3}
+  minCoins: 1
+  maxCoins: 3
   chaseRange: 5
   attackRange: 2
   attackCooldown: 2

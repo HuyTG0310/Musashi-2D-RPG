@@ -167,3 +167,4 @@ MonoBehaviour:
   damage: 100
   lifetime: 3
   hitEffect: {fileID: 0}
+  hitSound: {fileID: 8300000, guid: cea15bea948202f458877247ec49e0c4, type: 3}
