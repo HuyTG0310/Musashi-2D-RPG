@@ -30,7 +30,7 @@ AnimationClip:
       value: {fileID: -712339804, guid: 46aff4f71bc838f4da2c9173fe06e883, type: 3}
     - time: 0.21666667
       value: {fileID: 1480373667, guid: 46aff4f71bc838f4da2c9173fe06e883, type: 3}
-    - time: 0.26666668
+
       value: {fileID: 143570005, guid: 46aff4f71bc838f4da2c9173fe06e883, type: 3}
     - time: 0.33333334
       value: {fileID: 1607832072, guid: 46aff4f71bc838f4da2c9173fe06e883, type: 3}
@@ -40,7 +40,7 @@ AnimationClip:
       value: {fileID: 1562250512, guid: 46aff4f71bc838f4da2c9173fe06e883, type: 3}
     - time: 0.5
       value: {fileID: 1093773614, guid: 46aff4f71bc838f4da2c9173fe06e883, type: 3}
-    - time: 0.56666666
+
       value: {fileID: -1738051872, guid: 46aff4f71bc838f4da2c9173fe06e883, type: 3}
     - time: 0.6166667
       value: {fileID: -1444436500, guid: 46aff4f71bc838f4da2c9173fe06e883, type: 3}
@@ -116,7 +116,7 @@ AnimationClip:
   m_HasMotionFloatCurves: 0
   m_Events:
   - time: 0.6166667
-    functionName: DealAttackDamage
+
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0

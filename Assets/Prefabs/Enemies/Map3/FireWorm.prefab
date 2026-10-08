@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6894953736035269464}
   m_Layer: 7
-  m_Name: AttackPoint
+  m_Name: FirePoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -245,27 +245,20 @@ MonoBehaviour:
   deathSound: {fileID: 0}
   healthBarFill: {fileID: 0}
   chaseRange: 7
-  attackRange: 3
-  explodeRange: 1.8
+  patrolDistance: 3
   facingRight: 1
   groundCheck: {fileID: 2438957168132788494}
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
-  patrolDistance: 3
-  attackPoint: {fileID: 6894953736035269464}
-  attackRadius: 1.6
-  attackDamage: 10
+  firePoint: {fileID: 6894953736035269464}
+  fireProjectilePrefab: {fileID: 1270525401047101013, guid: b6931cef437757d4ab9c3df05624236e, type: 3}
   attackCooldown: 1.8
   lastAttackTime: 0
-  explosionRadius: 2
-  explosionDamage: 40
-  explosionDelay: 0.5
   playerLayer:
     serializedVersion: 2
     m_Bits: 8
   attackSound: {fileID: 0}
-  explosionSound: {fileID: 0}
 --- !u!95 &8946847343241864327
 Animator:
   serializedVersion: 5
