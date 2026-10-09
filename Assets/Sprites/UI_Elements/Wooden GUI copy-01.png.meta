@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: bba953e2ccaca5f44acd04e99ea0a9f1
+guid: e4aedbe3856172c4f8905404a186817b
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -110,13 +110,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: shop_anim_0
+      name: Wooden GUI copy-01_0
       rect:
         serializedVersion: 2
         x: 0
-        y: 0
-        width: 118
-        height: 128
+        y: 1055.5
+        width: 1430.5
+        height: 1055.5
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -124,20 +124,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 036ed7da6a1ec284b8524b64be6797f7
-      internalID: 188138042
+      spriteID: e83d5462511807b459048cbe4e88c22a
+      internalID: -1171051186
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: shop_anim_1
+      name: Wooden GUI copy-01_1
       rect:
         serializedVersion: 2
-        x: 118
-        y: 0
-        width: 118
-        height: 128
+        x: 1430
+        y: 1055.5
+        width: 1430.5
+        height: 1055.5
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -145,20 +145,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 0b01c8c7e305b2f4fb05c7f64a990e6e
-      internalID: -1363496175
+      spriteID: b57a4f7646589794abc6811376ff1403
+      internalID: -1439667802
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: shop_anim_2
+      name: Wooden GUI copy-01_2
       rect:
         serializedVersion: 2
-        x: 236
-        y: 0
-        width: 118
-        height: 128
+        x: 0
+        y: 0.5
+        width: 1430.5
+        height: 1055.5
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -166,20 +166,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: ef984feacd91dbf41916ad6c7f5e2f04
-      internalID: -707891344
+      spriteID: b79e9d136056ba44eb667a1b1ce54c4c
+      internalID: -712449570
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: shop_anim_3
+      name: Wooden GUI copy-01_3
       rect:
         serializedVersion: 2
-        x: 354
-        y: 0
-        width: 118
-        height: 128
+        x: 1430
+        y: 0.5
+        width: 1430.5
+        height: 1055.5
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -187,50 +187,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 1c5bacd405bd77c4b893414591d5f155
-      internalID: 1292405715
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: shop_anim_4
-      rect:
-        serializedVersion: 2
-        x: 472
-        y: 0
-        width: 118
-        height: 128
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: dbf315a5f0d142a4485be6a42edf4056
-      internalID: 1557000496
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: shop_anim_5
-      rect:
-        serializedVersion: 2
-        x: 590
-        y: 0
-        width: 118
-        height: 128
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: f05357cfd4c592f4bb75696cd3da5fe5
-      internalID: 995206932
+      spriteID: a8685a9fbff3c1b4c9380e53c7f50c44
+      internalID: -1268037735
       vertices: []
       indices: 
       edges: []
@@ -246,12 +204,10 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      shop_anim_0: 188138042
-      shop_anim_1: -1363496175
-      shop_anim_2: -707891344
-      shop_anim_3: 1292405715
-      shop_anim_4: 1557000496
-      shop_anim_5: 995206932
+      Wooden GUI copy-01_0: -1171051186
+      Wooden GUI copy-01_1: -1439667802
+      Wooden GUI copy-01_2: -712449570
+      Wooden GUI copy-01_3: -1268037735
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
