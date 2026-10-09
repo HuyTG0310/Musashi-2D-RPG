@@ -68,6 +68,9 @@ public class Player : MonoBehaviour
 
     [Header("Inventory")]
     public int coins = 0;
+    public int appleCount = 0;
+    public int shurikenCount = 0;
+
 
     private void Start()
     {
@@ -98,6 +101,7 @@ public class Player : MonoBehaviour
         ThrowShuriken();
         HandleStaminaRegen();
         UpdateStaminahUI();
+        UseApple();
 
         // 1. reset combo nếu quá thời gian
         if (Time.time - lastClickedTime > maxComboDelay)
@@ -334,10 +338,30 @@ public class Player : MonoBehaviour
     private void ThrowShuriken()
     {
         // nhấn U + đủ 4 thể lực
-        if (Input.GetKeyDown(KeyCode.U) && currentStamina >= 4)
+        if (Input.GetKeyDown(KeyCode.U) && shurikenCount > 0)
         {
             currentStamina -= 4;
+            shurikenCount--;
             anim.SetTrigger("throw");
+        }
+    }
+
+
+
+    private void UseApple()
+    {
+        if(Input.GetKeyDown(KeyCode.Alpha1) && appleCount > 0 && currentHealth < maxHealth)
+        {
+            appleCount--;
+            currentHealth += 50;
+
+            if(currentHealth > maxHealth)
+            {
+                currentHealth = maxHealth;
+            }
+
+            Debug.Log("Đã ăn táo! Số táo còn lại: " + appleCount);
+
         }
     }
 
