@@ -78,14 +78,14 @@ public class ShopController : MonoBehaviour
         if (playerScript != null && playerScript.coins >= price)
         {
             playerScript.coins -= price;
-            playerScript.currentHealth += 50;
+            playerScript.appleCount++;
 
             if(buySuccessSound != null)
             {
                 audioSource.PlayOneShot(buySuccessSound);
             }
 
-            StartCoroutine(ShowNotification("-10 Xu: Mua Táo thành công!", Color.green));
+            StartCoroutine(ShowNotification("-10 coins: Buy 1 apple!", Color.green));
         }
         else
         {
@@ -94,7 +94,34 @@ public class ShopController : MonoBehaviour
             {
                 audioSource.PlayOneShot(notEnoughCoinSound);
             }
-            StartCoroutine(ShowNotification("Không đủ xu!", Color.red));
+            StartCoroutine(ShowNotification("Coins are not enough!", Color.red));
+        }
+    }
+
+
+    public void BuyShurikens()
+    {
+        int price = 30;
+        if (playerScript != null && playerScript.coins >= price)
+        {
+            playerScript.coins -= price;
+            playerScript.shurikenCount += 5;
+
+            if (buySuccessSound != null)
+            {
+                audioSource.PlayOneShot(buySuccessSound);
+            }
+
+            StartCoroutine(ShowNotification("-30 coins: Buy 5 shurikens!", Color.green));
+        }
+        else
+        {
+            Debug.Log("Not enough coin");
+            if (buySuccessSound != null)
+            {
+                audioSource.PlayOneShot(notEnoughCoinSound);
+            }
+            StartCoroutine(ShowNotification("Coins are not enough!", Color.red));
         }
     }
 
