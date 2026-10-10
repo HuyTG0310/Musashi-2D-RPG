@@ -26,6 +26,7 @@ namespace Assets.Scripts.Enemies.Map3
 
         // Kiểm tra yellowNinja có đang thực hiện animation Attack hay không
         private bool isAttacking = false;
+        private float lastCheckedHealth = -1f; // dùng để phát hiện vừa bị đánh trúng (currentHealth giảm đột ngột)
 
         [Header("yellowNinja Sounds")]
         public AudioClip attackSound;
@@ -59,10 +60,25 @@ namespace Assets.Scripts.Enemies.Map3
         {
             // Nếu yellowNinja chết hoặc không tìm thấy Player
             // thì không làm gì
-            //if (isDead || currentHealth <= 0 || player == null)
-            //{
-            //    return;
-            //}
+            
+
+
+            // phát hiện vừa bị đánh trúng (máu giảm) trong lúc đang isAttacking ->
+            // animation Attack rất có thể đã bị Hurt ngắt giữa chừng, khiến Event EndAttack()
+            // không bao giờ được gọi -> tự giải phóng isAttacking ở đây để tránh kẹt vĩnh viễn
+            if (lastCheckedHealth < 0f)
+            {
+                lastCheckedHealth = currentHealth;
+            }
+            else if (currentHealth < lastCheckedHealth)
+            {
+                isAttacking = false;
+                lastCheckedHealth = currentHealth;
+            }
+            else
+            {
+                lastCheckedHealth = currentHealth;
+            }
 
 
             // =====================================================

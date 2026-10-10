@@ -11,6 +11,7 @@ namespace Assets.Scripts.Enemies.Map3
         public float patrolDistance = 3f;
 
         private bool isBusy = false; // đang phun lửa thì đứng yên, không patrol
+        private float lastCheckedHealth = -1f; // dùng để phát hiện vừa bị đánh trúng (currentHealth giảm đột ngột)
 
         [Header("FireWorm Movement")]
         public bool facingRight = true;
@@ -42,10 +43,24 @@ namespace Assets.Scripts.Enemies.Map3
 
         void FixedUpdate()
         {
-            //if (isDead || currentHealth <= 0 || player == null)
-            //{
-            //    return;
-            //}
+            
+
+            // phát hiện vừa bị đánh trúng (máu giảm) trong lúc đang isBusy ->
+            // animation Attack rất có thể đã bị Hurt ngắt giữa chừng, khiến Event EndAttack()
+            // không bao giờ được gọi -> tự giải phóng isBusy ở đây để tránh kẹt vĩnh viễn
+            if (lastCheckedHealth < 0f)
+            {
+                lastCheckedHealth = currentHealth; // lần đầu tiên, chỉ lưu lại chứ chưa so sánh
+            }
+            else if (currentHealth < lastCheckedHealth)
+            {
+                isBusy = false;
+                lastCheckedHealth = currentHealth;
+            }
+            else
+            {
+                lastCheckedHealth = currentHealth;
+            }
 
             if (isBusy)
             {
@@ -132,7 +147,7 @@ namespace Assets.Scripts.Enemies.Map3
 
             if (isBusy) return;
 
-            if (Time.time >= lastAttackTime + attackCooldown)  // chưa đủ cooldown thì không bắn tiếp
+            if (Time.time >= lastAttackTime + attackCooldown)
             {
                 isBusy = true;
                 anim.SetTrigger("attack");
@@ -174,6 +189,7 @@ namespace Assets.Scripts.Enemies.Map3
         // Gọi bằng Animation Event ở frame cuối clip Attack
         public void EndAttack()
         {
+            Debug.Log(gameObject.name + ": EndAttack() ĐƯỢC GỌI lúc " + Time.time + " - isBusy chuyển về false");
             isBusy = false;
         }
 
