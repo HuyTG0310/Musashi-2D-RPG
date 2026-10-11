@@ -494,4 +494,6 @@ public class Player : MonoBehaviour
         Debug.Log("Đã nhặt xu! Tổng tiền hiện tại: " + coins);
         // Sau này bạn có thể thêm code update UI Text số tiền ở đây
     }
+
+
 }

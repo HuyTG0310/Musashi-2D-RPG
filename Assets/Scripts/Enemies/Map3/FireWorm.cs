@@ -79,12 +79,12 @@ namespace Assets.Scripts.Enemies.Map3
             // player trong tầm phát hiện thì đứng yên phun lửa, ngoài tầm thì patrol
             if (distanceToPlayer <= chaseRange)
             {
-                Debug.Log(gameObject.name + ": player cách " + distanceToPlayer.ToString("F2") + " (trong chaseRange=" + chaseRange + ") -> ATTACK");
+                //Debug.Log(gameObject.name + ": player cách " + distanceToPlayer.ToString("F2") + " (trong chaseRange=" + chaseRange + ") -> ATTACK");
                 AttackPlayer();
             }
             else
             {
-                Debug.Log(gameObject.name + ": player cách " + distanceToPlayer.ToString("F2") + " (ngoài chaseRange=" + chaseRange + ") -> PATROL");
+                //Debug.Log(gameObject.name + ": player cách " + distanceToPlayer.ToString("F2") + " (ngoài chaseRange=" + chaseRange + ") -> PATROL");
                 Patrol();
             }
         }
