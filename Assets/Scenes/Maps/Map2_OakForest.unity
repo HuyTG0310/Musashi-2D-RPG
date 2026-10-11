@@ -8874,6 +8874,10 @@ PrefabInstance:
       propertyPath: audioSource
       value: 
       objectReference: {fileID: 1089474815}
+    - target: {fileID: 942072418564494762, guid: c6b59f7da7222594a872526b0cb65723, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1127498147518853664, guid: c6b59f7da7222594a872526b0cb65723, type: 3}
       propertyPath: m_AnchorMax.y
       value: 1
@@ -8912,7 +8916,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3079759214171209398, guid: c6b59f7da7222594a872526b0cb65723, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4001155586257290574, guid: c6b59f7da7222594a872526b0cb65723, type: 3}
       propertyPath: m_AnchorMax.y
