@@ -15,7 +15,7 @@ TagManager:
   - Enemy
   - EnemyProjectile
   - Coin
-  - 
+  - Trap
   - 
   - 
   - 
@@ -64,4 +64,7 @@ TagManager:
     locked: 0
   - name: Coin
     uniqueID: 519018043
+    locked: 0
+  - name: Trap
+    uniqueID: 3055555075
     locked: 0
