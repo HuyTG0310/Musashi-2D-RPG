@@ -126,6 +126,33 @@ public class ShopController : MonoBehaviour
     }
 
 
+    public void BuySake()
+    {
+        int price = 10;
+        if (playerScript != null && playerScript.coins >= price)
+        {
+            playerScript.coins -= price;
+            playerScript.sakeCount += 1;
+
+            if (buySuccessSound != null)
+            {
+                audioSource.PlayOneShot(buySuccessSound);
+            }
+
+            StartCoroutine(ShowNotification("-10 coins: Buy 1 sake!", Color.green));
+        }
+        else
+        {
+            Debug.Log("Not enough coin");
+            if (buySuccessSound != null)
+            {
+                audioSource.PlayOneShot(notEnoughCoinSound);
+            }
+            StartCoroutine(ShowNotification("Coins are not enough!", Color.red));
+        }
+    }
+
+
     public void CloseShop()
     {
         shopUI.SetActive(false);
