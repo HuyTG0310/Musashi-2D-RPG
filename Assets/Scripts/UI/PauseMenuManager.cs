@@ -173,13 +173,24 @@ namespace Musashi.UI
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void AutoInitialize()
         {
-            string activeScene = SceneManager.GetActiveScene().name;
-            if (string.Equals(activeScene, "MainMenuScene", System.StringComparison.OrdinalIgnoreCase))
+            SceneManager.sceneLoaded -= OnAnySceneLoaded;
+            SceneManager.sceneLoaded += OnAnySceneLoaded;
+            TrySpawn(SceneManager.GetActiveScene().name);
+        }
+
+        private static void OnAnySceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            TrySpawn(scene.name);
+        }
+
+        private static void TrySpawn(string sceneName)
+        {
+            if (string.Equals(sceneName, "MainMenuScene", System.StringComparison.OrdinalIgnoreCase))
             {
                 return;
             }
 
-            if (Instance == null)
+            if (Instance == null && Object.FindObjectOfType<PauseMenuManager>() == null)
             {
                 GameObject prefab = Resources.Load<GameObject>("UI/PauseMenuPrefab");
                 if (prefab != null)

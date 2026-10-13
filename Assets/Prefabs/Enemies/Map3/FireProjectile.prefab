@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 7157860925161686074}
   - component: {fileID: 5698389506317908203}
   - component: {fileID: 1880689493883490562}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: FireProjectile
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -74,8 +74,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: -1928078881
+  m_SortingLayer: 5
   m_SortingOrder: 0
   m_Sprite: {fileID: 208562654, guid: 2ee4919b59666eb479d450c75f326d21, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
