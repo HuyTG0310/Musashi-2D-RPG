@@ -6,6 +6,18 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/SampleScene.unity
-    guid: 8c9cfa26abfee488c85f1582747f6a02
+    path: Assets/Scenes/UI_Scenes/MainMenuScene.unity
+    guid: cfb2c89a0a31edc41a17146fc525c9d1
+  - enabled: 1
+    path: Assets/Scenes/Maps/Map1_AutumnForest.unity
+    guid: 9d525cae4deb9e949b0aa38dd918e930
+  - enabled: 1
+    path: Assets/Scenes/Maps/Map2_OakForest.unity
+    guid: 1cc66c0e01423664985af2210f281d8d
+  - enabled: 1
+    path: Assets/Scenes/Maps/Map3_Cave.unity
+    guid: 3e60d07d5a5e6384f93c258e6c8a3b68
+  - enabled: 1
+    path: Assets/Scenes/Maps/Map4_Desert.unity
+    guid: 026c95871cbc36545bd9b3770e2fef91
   m_configObjects: {}
