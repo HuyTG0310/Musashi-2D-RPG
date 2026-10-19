@@ -28,6 +28,10 @@ public class FlameTrap : MonoBehaviour
 
     private Player currentPlayer;
 
+
+    public AudioSource trapAudioSource;
+    public AudioClip fireSound;
+
     private void Start()
     {
         // Get Animator automatically if not assigned.
@@ -171,5 +175,15 @@ public class FlameTrap : MonoBehaviour
         // Disable the hitbox.
         if (flameHitbox != null)
             flameHitbox.enabled = false;
+    }
+
+
+
+    private void PlayFireSound()
+    {
+        if(trapAudioSource != null &&  fireSound != null)
+        {
+            trapAudioSource.PlayOneShot(fireSound);
+        }
     }
 }

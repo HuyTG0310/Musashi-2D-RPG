@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 7983942537718171118}
   m_Layer: 3
   m_Name: Musashi
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -78,7 +78,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -98706601
-  m_SortingLayer: 5
+  m_SortingLayer: 6
   m_SortingOrder: 0
   m_Sprite: {fileID: 1441468045, guid: abd3c773437140e48af4096f7fc82ec4, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -231,9 +231,13 @@ MonoBehaviour:
   dashSound: {fileID: 8300000, guid: 7d98b6c44694477469599eb7e37d6c4f, type: 3}
   hurtSound: {fileID: 8300000, guid: f6fd16bdbeb9ccf4a84f4f935e81c5f2, type: 3}
   deathSound: {fileID: 8300000, guid: e7ca7d1d6da0562499dcfc9621af6114, type: 3}
+  healthSound: {fileID: 8300000, guid: 29aaea997fc44c9478b5a9ca7c939f38, type: 3}
   hpFillImage: {fileID: 0}
   spFillImage: {fileID: 0}
   coins: 0
+  appleCount: 0
+  shurikenCount: 0
+  sakeCount: 0
 --- !u!1 &5907965567597438082
 GameObject:
   m_ObjectHideFlags: 0

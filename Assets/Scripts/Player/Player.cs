@@ -40,6 +40,7 @@ public class Player : MonoBehaviour
 
     [Header("Combat Stats")]
     public float attackDamage = 100f;
+    public float defensePower = 10f;
     public GameObject shurikenPrefab;
     public Transform firePoint;
     public Transform attackPoint;
@@ -59,7 +60,7 @@ public class Player : MonoBehaviour
     public AudioClip dashSound;
     public AudioClip hurtSound;
     public AudioClip deathSound;
-
+    public AudioClip healthSound;
 
     public Image hpFillImage;
     private bool isDefending;
@@ -70,6 +71,7 @@ public class Player : MonoBehaviour
     public int coins = 0;
     public int appleCount = 0;
     public int shurikenCount = 0;
+    public int sakeCount = 0;
 
 
     private void Start()
@@ -87,6 +89,11 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
+        if (Musashi.UI.PauseMenuManager.IsPaused || Time.timeScale == 0f)
+        {
+            return;
+        }
+
         // nếu đang lướt thì ko di chuyển, đánh, chém,..
         if (isDashing)
         {
@@ -99,9 +106,10 @@ public class Player : MonoBehaviour
         HandleComboTransitions();
         HandleDefend();
         ThrowShuriken();
-        HandleStaminaRegen();
+        //HandleStaminaRegen();
         UpdateStaminahUI();
         UseApple();
+        UseSakeGourd();
 
         // 1. reset combo nếu quá thời gian
         if (Time.time - lastClickedTime > maxComboDelay)
@@ -233,6 +241,9 @@ public class Player : MonoBehaviour
 
     private IEnumerator DashRoutine()
     {
+        ResetCombatState();
+
+
         // 1. bắt đầu lướt
         isDashing = true;
         isDashing = true;
@@ -268,12 +279,21 @@ public class Player : MonoBehaviour
             return;
         }
 
+
+        float actualDamage = damage - defensePower;
+
+        if (actualDamage < 0)
+        {
+            actualDamage = 0;
+        }
+
         currentHealth -= damage;
         UpdateHealthUI();
 
 
         if (currentHealth > 0)
         {
+            ResetCombatState();
             anim.SetTrigger("hurt");
             if (audioManager != null && hurtSound != null)
             {
@@ -350,15 +370,17 @@ public class Player : MonoBehaviour
 
     private void UseApple()
     {
-        if(Input.GetKeyDown(KeyCode.Alpha1) && appleCount > 0 && currentHealth < maxHealth)
+        if (Input.GetKeyDown(KeyCode.Alpha1) && appleCount > 0 && currentHealth < maxHealth)
         {
             appleCount--;
             currentHealth += 50;
 
-            if(currentHealth > maxHealth)
+            if (currentHealth > maxHealth)
             {
                 currentHealth = maxHealth;
             }
+
+            UpdateHealthUI();
 
             Debug.Log("Đã ăn táo! Số táo còn lại: " + appleCount);
 
@@ -483,6 +505,15 @@ public class Player : MonoBehaviour
     }
 
 
+    public void TriggerHealthSound()
+    {
+        if (audioManager != null && healthSound != null)
+        {
+            audioManager.PlayerSFX(healthSound);
+        }
+    }
+
+
     public void SpawnShuriken()
     {
         Instantiate(shurikenPrefab, firePoint.position, firePoint.rotation);
@@ -495,5 +526,47 @@ public class Player : MonoBehaviour
         // Sau này bạn có thể thêm code update UI Text số tiền ở đây
     }
 
+    private void UseSakeGourd()
+    {
+        if (Input.GetKeyDown(KeyCode.Alpha3) && sakeCount > 0 && currentStamina < maxStamina)
+        {
+            sakeCount--; // Trừ 1 bình trong túi
+
+            // 1. Chạy Animation uống rượu (gọi tên trigger là "healing" theo đúng tên bạn đặt)
+            if (anim != null)
+            {
+                anim.SetTrigger("heal");
+            }
+
+            // 2. Cập nhật chỉ số (Bạn chọn 1 trong 2 dòng dưới đây tùy ý định thiết kế)
+
+            // --> NẾU BẠN CHỌN HỒI SP:
+            currentStamina += 40;
+            if (currentStamina > maxStamina) currentStamina = maxStamina;
+
+            // --> NẾU BẠN CHỌN HỒI HP:
+            // currentHealth += 100; 
+            // if (currentHealth > maxHealth) currentHealth = maxHealth;
+
+            Debug.Log("Đã uống Sake! Số bình còn lại: " + sakeCount);
+            UpdateStaminahUI();
+        }
+        else
+        {
+            Debug.Log("Hết bình hồ lô rồi!");
+        }
+    }
+
+
+    private void ResetCombatState()
+    {
+        noOfClicks = 0;
+        anim.SetBool("atk1", false);
+        anim.SetBool("atk2", false);
+        anim.SetBool("atk3", false);
+
+        isDefending = false;
+        anim.SetBool("isDefending", false);
+    }
 
 }

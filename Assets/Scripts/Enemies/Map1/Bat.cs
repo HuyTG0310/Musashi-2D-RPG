@@ -38,6 +38,26 @@ public class Bat : EnemyBase
                     rb.gravityScale = 0f;       // Tắt trọng lực lại để xác nằm im
 
                     anim.SetBool("isGrounded", true); // Chuyển sang hình death.png
+
+                    if (coinPrefab == null) return;
+
+                    // Random số lượng xu văng ra từ min đến max
+                    int dropCount = Random.Range(minCoins, maxCoins + 1);
+
+                    for (int i = 0; i < dropCount; i++)
+                    {
+                        GameObject coin = Instantiate(coinPrefab, transform.position, Quaternion.identity);
+
+                        Rigidbody2D coinRb = coin.GetComponent<Rigidbody2D>();
+                        if (coinRb != null)
+                        {
+                            float randomForceX = Random.Range(-3f, 3f);
+                            float randomForceY = Random.Range(4f, 7f);
+                            coinRb.AddForce(new Vector2(randomForceX, randomForceY), ForceMode2D.Impulse);
+                        }
+                    }
+
+
                     Destroy(gameObject, 2f);          // Xóa game object sau 2 giây
                 }
             }
