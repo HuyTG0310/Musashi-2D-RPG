@@ -89,6 +89,11 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
+        if (Musashi.UI.PauseMenuManager.IsPaused || Time.timeScale == 0f)
+        {
+            return;
+        }
+
         // nếu đang lướt thì ko di chuyển, đánh, chém,..
         if (isDashing)
         {
