@@ -40,6 +40,7 @@ public class Player : MonoBehaviour
 
     [Header("Combat Stats")]
     public float attackDamage = 100f;
+    public float defensePower = 10f;
     public GameObject shurikenPrefab;
     public Transform firePoint;
     public Transform attackPoint;
@@ -235,6 +236,9 @@ public class Player : MonoBehaviour
 
     private IEnumerator DashRoutine()
     {
+        ResetCombatState();
+
+
         // 1. bắt đầu lướt
         isDashing = true;
         isDashing = true;
@@ -270,12 +274,21 @@ public class Player : MonoBehaviour
             return;
         }
 
+
+        float actualDamage = damage - defensePower;
+
+        if (actualDamage < 0)
+        {
+            actualDamage = 0;
+        }
+
         currentHealth -= damage;
         UpdateHealthUI();
 
 
         if (currentHealth > 0)
         {
+            ResetCombatState();
             anim.SetTrigger("hurt");
             if (audioManager != null && hurtSound != null)
             {
@@ -352,12 +365,12 @@ public class Player : MonoBehaviour
 
     private void UseApple()
     {
-        if(Input.GetKeyDown(KeyCode.Alpha1) && appleCount > 0 && currentHealth < maxHealth)
+        if (Input.GetKeyDown(KeyCode.Alpha1) && appleCount > 0 && currentHealth < maxHealth)
         {
             appleCount--;
             currentHealth += 50;
 
-            if(currentHealth > maxHealth)
+            if (currentHealth > maxHealth)
             {
                 currentHealth = maxHealth;
             }
@@ -537,6 +550,18 @@ public class Player : MonoBehaviour
         {
             Debug.Log("Hết bình hồ lô rồi!");
         }
+    }
+
+
+    private void ResetCombatState()
+    {
+        noOfClicks = 0;
+        anim.SetBool("atk1", false);
+        anim.SetBool("atk2", false);
+        anim.SetBool("atk3", false);
+
+        isDefending = false;
+        anim.SetBool("isDefending", false);
     }
 
 }
