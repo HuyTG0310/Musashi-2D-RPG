@@ -14,11 +14,11 @@ public class HUDManager : MonoBehaviour
     public TextMeshProUGUI coinText;
     public TextMeshProUGUI sakeText;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+
+    [Header("Combat Stats Text")]
+    public TextMeshProUGUI attackText;
+    public TextMeshProUGUI defenseText;
+
 
     // Update is called once per frame
     void Update()
@@ -43,6 +43,17 @@ public class HUDManager : MonoBehaviour
             if (sakeText != null)
             {
                 sakeText.text = "x" + playerScript.sakeCount.ToString();
+            }
+
+
+            if(attackText != null)
+            {
+                attackText.text = "ATK: " + playerScript.attackDamage.ToString();
+            }
+
+            if(defenseText != null)
+            {
+                defenseText.text = "DEF: " + playerScript.defensePower.ToString();
             }
         }
     }
