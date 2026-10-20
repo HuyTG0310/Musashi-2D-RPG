@@ -570,6 +570,17 @@ namespace Musashi.EditorTools
             rootObj.AddComponent<GraphicRaycaster>();
             PauseMenuManager pauseMgr = rootObj.AddComponent<PauseMenuManager>();
 
+            AudioSource audioSrc = rootObj.AddComponent<AudioSource>();
+            audioSrc.playOnAwake = false;
+            audioSrc.spatialBlend = 0f;
+            audioSrc.ignoreListenerPause = true;
+
+            AudioClip clickClip = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/SFX/mouse_click.mp3");
+            if (clickClip == null)
+            {
+                clickClip = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Resources/Audio/mouse_click.mp3");
+            }
+
             // 1. HUD Pause Button (Top-Right of screen)
             GameObject pauseBtnObj = CreateUIElement("HUDPauseButton", rootObj.transform);
             RectTransform pauseBtnRT = pauseBtnObj.GetComponent<RectTransform>();
@@ -637,6 +648,8 @@ namespace Musashi.EditorTools
             SerializedObject so = new SerializedObject(pauseMgr);
             so.FindProperty("pauseMenuUI").objectReferenceValue = pausePanel;
             so.FindProperty("pauseButtonObj").objectReferenceValue = pauseBtnObj;
+            if (so.FindProperty("audioSource") != null) so.FindProperty("audioSource").objectReferenceValue = audioSrc;
+            if (so.FindProperty("buttonClickClip") != null && clickClip != null) so.FindProperty("buttonClickClip").objectReferenceValue = clickClip;
             so.ApplyModifiedProperties();
 
             pausePanel.SetActive(false);
