@@ -12,6 +12,10 @@ namespace Musashi.UI
         [SerializeField] private GameObject pauseButtonObj;
         [SerializeField] private GameObject settingsPanel;
 
+        [Header("Audio Settings")]
+        [SerializeField] private AudioSource audioSource;
+        [SerializeField] private AudioClip buttonClickClip;
+
         [Header("Settings")]
         [SerializeField] private string mainMenuSceneName = "MainMenuScene";
 
@@ -28,8 +32,46 @@ namespace Musashi.UI
             Instance = this;
             DontDestroyOnLoad(gameObject);
 
+            EnsureAudioSource();
             EnsureEventSystem();
             SceneManager.sceneLoaded += OnSceneLoaded;
+        }
+
+        private void EnsureAudioSource()
+        {
+            if (audioSource == null)
+            {
+                audioSource = GetComponent<AudioSource>();
+                if (audioSource == null)
+                {
+                    audioSource = gameObject.AddComponent<AudioSource>();
+                }
+            }
+
+            if (audioSource != null)
+            {
+                audioSource.playOnAwake = false;
+                audioSource.spatialBlend = 0f;
+                audioSource.ignoreListenerPause = true;
+            }
+
+            if (buttonClickClip == null)
+            {
+                buttonClickClip = Resources.Load<AudioClip>("Audio/mouse_click");
+                if (buttonClickClip == null)
+                {
+                    buttonClickClip = Resources.Load<AudioClip>("Audio/SFX/mouse_click");
+                }
+            }
+        }
+
+        public void PlayClickSound()
+        {
+            EnsureAudioSource();
+            if (audioSource != null && buttonClickClip != null)
+            {
+                audioSource.PlayOneShot(buttonClickClip);
+            }
         }
 
         private void OnDestroy()
@@ -108,6 +150,7 @@ namespace Musashi.UI
 
         public void Pause()
         {
+            PlayClickSound();
             if (pauseMenuUI != null) pauseMenuUI.SetActive(true);
             if (pauseButtonObj != null) pauseButtonObj.SetActive(false);
             Time.timeScale = 0f;
@@ -116,6 +159,7 @@ namespace Musashi.UI
 
         public void Resume()
         {
+            PlayClickSound();
             if (pauseMenuUI != null) pauseMenuUI.SetActive(false);
             if (settingsPanel != null) settingsPanel.SetActive(false);
             if (pauseButtonObj != null) pauseButtonObj.SetActive(true);
@@ -125,6 +169,7 @@ namespace Musashi.UI
 
         public void RestartLevel()
         {
+            PlayClickSound();
             Time.timeScale = 1f;
             IsPaused = false;
             if (pauseMenuUI != null) pauseMenuUI.SetActive(false);
@@ -136,16 +181,19 @@ namespace Musashi.UI
 
         public void OpenSettings()
         {
+            PlayClickSound();
             if (settingsPanel != null) settingsPanel.SetActive(true);
         }
 
         public void CloseSettings()
         {
+            PlayClickSound();
             if (settingsPanel != null) settingsPanel.SetActive(false);
         }
 
         public void LoadMainMenu()
         {
+            PlayClickSound();
             Time.timeScale = 1f;
             IsPaused = false;
             if (pauseMenuUI != null) pauseMenuUI.SetActive(false);
