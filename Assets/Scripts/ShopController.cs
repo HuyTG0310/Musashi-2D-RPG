@@ -80,7 +80,7 @@ public class ShopController : MonoBehaviour
             playerScript.coins -= price;
             playerScript.appleCount++;
 
-            if(buySuccessSound != null)
+            if (buySuccessSound != null)
             {
                 audioSource.PlayOneShot(buySuccessSound);
             }
@@ -126,6 +126,33 @@ public class ShopController : MonoBehaviour
     }
 
 
+    public void BuySake()
+    {
+        int price = 10;
+        if (playerScript != null && playerScript.coins >= price)
+        {
+            playerScript.coins -= price;
+            playerScript.sakeCount += 1;
+
+            if (buySuccessSound != null)
+            {
+                audioSource.PlayOneShot(buySuccessSound);
+            }
+
+            StartCoroutine(ShowNotification("-10 coins: Buy 1 sake!", Color.green));
+        }
+        else
+        {
+            Debug.Log("Not enough coin");
+            if (buySuccessSound != null)
+            {
+                audioSource.PlayOneShot(notEnoughCoinSound);
+            }
+            StartCoroutine(ShowNotification("Coins are not enough!", Color.red));
+        }
+    }
+
+
     public void CloseShop()
     {
         shopUI.SetActive(false);
@@ -149,6 +176,58 @@ public class ShopController : MonoBehaviour
 
         notificationText.gameObject.SetActive(false);
     }
+
+
+
+
+    public void UpgradeAttack()
+    {
+        int upgradeCost = 30;
+        float attackBonus = 15f;
+
+        if (playerScript != null && playerScript.coins >= upgradeCost)
+        {
+            playerScript.coins -= upgradeCost;
+            playerScript.attackDamage += attackBonus;
+
+
+            if (buySuccessSound != null)
+            {
+                audioSource.PlayOneShot(buySuccessSound);
+            }
+
+            StartCoroutine(ShowNotification($"-{upgradeCost} Coins: Upgrade Katana (ATK +{attackBonus})!", Color.green));
+        }
+        else
+        {
+            if (notEnoughCoinSound != null)
+            {
+                audioSource.PlayOneShot(notEnoughCoinSound);
+                StartCoroutine(ShowNotification("Coins not enough!", Color.red));
+            }
+        }
+    }
+
+    public void UpgradeDefense()
+    {
+        int upgradeCost = 20;
+        float defenseBonus = 10f;
+
+        if (playerScript != null && playerScript.coins >= upgradeCost)
+        {
+            playerScript.coins -= upgradeCost;
+            playerScript.defensePower += defenseBonus;
+
+            if (buySuccessSound != null) audioSource.PlayOneShot(buySuccessSound);
+            StartCoroutine(ShowNotification($"-{upgradeCost} Coins: Improve armor (DEF +{defenseBonus})!", Color.green));
+        }
+        else
+        {
+            if (notEnoughCoinSound != null) audioSource.PlayOneShot(notEnoughCoinSound);
+            StartCoroutine(ShowNotification("Coins not enough!", Color.red));
+        }
+    }
+
 
 
 }

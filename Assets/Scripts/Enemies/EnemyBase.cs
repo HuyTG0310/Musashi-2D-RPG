@@ -46,6 +46,8 @@ public class EnemyBase : MonoBehaviour
             player = playerScript.gameObject.transform;     // tham chiếu đến component transform của player
         }
         spriteRenderer = GetComponent<SpriteRenderer>();
+        float randomOffset = Random.Range(-2f, 2f);
+        moveSpeed += randomOffset;
     }
 
 

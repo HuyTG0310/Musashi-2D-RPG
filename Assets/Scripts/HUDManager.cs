@@ -11,16 +11,14 @@ public class HUDManager : MonoBehaviour
     [Header("Các dòng chữ UI")]
     public TextMeshProUGUI appleText;
     public TextMeshProUGUI shurikenText;
+    public TextMeshProUGUI coinText;
+    public TextMeshProUGUI sakeText;
 
 
+    [Header("Combat Stats Text")]
+    public TextMeshProUGUI attackText;
+    public TextMeshProUGUI defenseText;
 
-
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
 
     // Update is called once per frame
     void Update()
@@ -35,6 +33,27 @@ public class HUDManager : MonoBehaviour
             if(shurikenText != null)
             {
                 shurikenText.text = "x" + playerScript.shurikenCount.ToString();
+            }
+
+            if (coinText != null)
+            {
+                coinText.text = "x" + playerScript.coins.ToString();
+            }
+
+            if (sakeText != null)
+            {
+                sakeText.text = "x" + playerScript.sakeCount.ToString();
+            }
+
+
+            if(attackText != null)
+            {
+                attackText.text = "ATK: " + playerScript.attackDamage.ToString();
+            }
+
+            if(defenseText != null)
+            {
+                defenseText.text = "DEF: " + playerScript.defensePower.ToString();
             }
         }
     }
