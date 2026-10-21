@@ -51,7 +51,7 @@ public class EnemyBase : MonoBehaviour
 
 
     // hàm này được gọi khi Musashi tấn công enemy (logic áp dụng cho mọi enemy)
-    public void TakeDamage(float incomingDamage)
+    public virtual void TakeDamage(float incomingDamage)
     {
         float actualDamage = incomingDamage - defense; // sát thương trừ vào giáp
 

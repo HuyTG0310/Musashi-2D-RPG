@@ -275,11 +275,12 @@ public class Player : MonoBehaviour
         if (currentHealth > 0)
         {
             anim.SetTrigger("hurt");
+            StartCoroutine(FlashRedRoutine());
             if (audioManager != null && hurtSound != null)
             {
                 audioManager.PlayerSFX(hurtSound);
             }
-            Debug.Log("Musashi HP: " + currentHealth);
+            Debug.Log("Musashi bị đánh trúng! Mất " + damage + " HP. Còn lại: " + currentHealth);
         }
         else
         {
@@ -493,5 +494,15 @@ public class Player : MonoBehaviour
         coins += amount;
         Debug.Log("Đã nhặt xu! Tổng tiền hiện tại: " + coins);
         // Sau này bạn có thể thêm code update UI Text số tiền ở đây
+    }
+
+    private IEnumerator FlashRedRoutine()
+    {
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.color = Color.red;
+            yield return new WaitForSeconds(0.12f);
+            spriteRenderer.color = Color.white;
+        }
     }
 }
