@@ -207,6 +207,7 @@ namespace Assets.Scripts.Enemies.Map2
                 {
                     anim.SetTrigger("attack" + attackCombo);
                 }
+                TriggerAttackSound();
                 lastAttackTime = Time.time;
                 Debug.Log("Mimic attacking Musashi!");
 
@@ -234,7 +235,7 @@ namespace Assets.Scripts.Enemies.Map2
             }
         }
 
-        private void TriggerAttackSound()
+        public void TriggerAttackSound()
         {
             if (audioManager != null && attackSound != null)
             {
