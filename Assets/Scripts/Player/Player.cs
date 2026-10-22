@@ -295,11 +295,12 @@ public class Player : MonoBehaviour
         {
             ResetCombatState();
             anim.SetTrigger("hurt");
+            StartCoroutine(FlashRedRoutine());
             if (audioManager != null && hurtSound != null)
             {
                 audioManager.PlayerSFX(hurtSound);
             }
-            Debug.Log("Musashi HP: " + currentHealth);
+            Debug.Log("Musashi bị đánh trúng! Mất " + damage + " HP. Còn lại: " + currentHealth);
         }
         else
         {
@@ -526,6 +527,15 @@ public class Player : MonoBehaviour
         // Sau này bạn có thể thêm code update UI Text số tiền ở đây
     }
 
+    private IEnumerator FlashRedRoutine()
+    {
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.color = Color.red;
+            yield return new WaitForSeconds(0.12f);
+            spriteRenderer.color = Color.white;
+        }
+    }
     private void UseSakeGourd()
     {
         if (Input.GetKeyDown(KeyCode.Alpha3) && sakeCount > 0 && currentStamina < maxStamina)
