@@ -263,8 +263,8 @@ MonoBehaviour:
   currentHealth: 0
   defense: 70
   moveSpeed: 2
-  hurtSound: {fileID: 8300000, guid: 515b671c8a01ab4489a60e8fe21dfb32, type: 3}
-  deathSound: {fileID: 8300000, guid: 9f87dc07a0201ec4bad07692b4e9fe88, type: 3}
+  hurtSound: {fileID: 8300000, guid: 71be5e74d6af43fbbc641ff064f4e584, type: 3}
+  deathSound: {fileID: 8300000, guid: 3129ac1e0ae04f469350cdfde5539c2b, type: 3}
   healthBarFill: {fileID: 4984194916003828138}
   coinPrefab: {fileID: 3969643675363155990, guid: 86a3a6a750e24a44e8c9875d32656394, type: 3}
   minCoins: 2
@@ -285,7 +285,7 @@ MonoBehaviour:
   playerLayer:
     serializedVersion: 2
     m_Bits: 8
-  attackSound: {fileID: 8300000, guid: cea15bea948202f458877247ec49e0c4, type: 3}
+  attackSound: {fileID: 8300000, guid: d1db982cbab149cab34e00e90178b970, type: 3}
 --- !u!95 &2443680496821721983
 Animator:
   serializedVersion: 5
