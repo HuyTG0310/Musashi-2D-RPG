@@ -53,7 +53,7 @@ public class EnemyBase : MonoBehaviour
 
 
     // hàm này được gọi khi Musashi tấn công enemy (logic áp dụng cho mọi enemy)
-    public void TakeDamage(float incomingDamage)
+    public virtual void TakeDamage(float incomingDamage)
     {
         float actualDamage = incomingDamage - defense; // sát thương trừ vào giáp
 
@@ -83,6 +83,7 @@ public class EnemyBase : MonoBehaviour
         else
         {
             // Nếu còn sống: Chỉ chạy animation hurt và phát âm thanh hurt
+            TriggerHurtSound();
             anim.SetTrigger("hurt");
             StartCoroutine(FlashRedRoutine());
         }
@@ -102,8 +103,11 @@ public class EnemyBase : MonoBehaviour
     }
 
 
-    protected void TriggerHurtSound()
+    private float lastHurtSoundTime;
+    public void TriggerHurtSound()
     {
+        if (Time.time < lastHurtSoundTime + 0.15f) return;
+        lastHurtSoundTime = Time.time;
         if (audioManager != null && hurtSound != null)
         {
             audioManager.PlayerSFX(hurtSound);
