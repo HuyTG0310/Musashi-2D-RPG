@@ -4,6 +4,8 @@ using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
+
+    public static Player instance;
     private Rigidbody2D rb;
     private Animator anim;
 
@@ -72,6 +74,21 @@ public class Player : MonoBehaviour
     public int appleCount = 0;
     public int shurikenCount = 0;
     public int sakeCount = 0;
+
+
+    public void Awake()
+    {
+        if (instance == null)
+        {
+            instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else if (instance != this)
+        {
+            Destroy(gameObject);
+        }
+    }
+
 
 
     private void Start()
