@@ -40,17 +40,35 @@ public class EnemyBase : MonoBehaviour
         col = GetComponent<Collider2D>();
         rb = GetComponent<Rigidbody2D>();
         audioManager = FindAnyObjectByType<AudioManager>();
-        playerScript = FindAnyObjectByType<Player>();
-        if (playerScript != null)
-        {
-            player = playerScript.gameObject.transform;     // tham chiếu đến component transform của player
-        }
+        
+        EnsurePlayerReference();
+
         spriteRenderer = GetComponent<SpriteRenderer>();
-        float randomOffset = Random.Range(-2f, 2f);
-        moveSpeed += randomOffset;
+        float randomOffset = Random.Range(-0.2f, 0.2f);
+        moveSpeed = Mathf.Max(1.5f, moveSpeed + randomOffset);
     }
 
-
+    public bool EnsurePlayerReference()
+    {
+        if (playerScript == null || player == null || !playerScript.gameObject.activeInHierarchy)
+        {
+            if (Player.instance != null && Player.instance.gameObject.activeInHierarchy)
+            {
+                playerScript = Player.instance;
+                player = playerScript.transform;
+            }
+            else
+            {
+                Player found = FindAnyObjectByType<Player>();
+                if (found != null && found.gameObject.activeInHierarchy)
+                {
+                    playerScript = found;
+                    player = found.transform;
+                }
+            }
+        }
+        return playerScript != null && player != null;
+    }
 
     // hàm này được gọi khi Musashi tấn công enemy (logic áp dụng cho mọi enemy)
     public virtual void TakeDamage(float incomingDamage)

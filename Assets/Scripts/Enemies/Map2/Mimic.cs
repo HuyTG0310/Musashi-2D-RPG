@@ -9,7 +9,7 @@ namespace Assets.Scripts.Enemies.Map2
         public bool isAwake = false;         // Ban đầu đóng giả rương báu
         public float wakeRange = 6f;          // Tầm kích hoạt khiến Rương thức giấc
         public float chaseRange = 8f;         // Tầm đuổi theo Musashi
-        public float attackRange = 2.5f;      // Tầm táp/cắn cận chiến (Tăng lên 2.5f để đút trúng Collider)
+        public float attackRange = 2.5f;      // Tầm táp/cắn cận chiến
         public float attackCooldown = 1.5f;   // Thời gian hồi chiêu giữa các đòn đánh
         private float lastAttackTime;
         private bool hasDealtDamageThisAttack = false;
@@ -49,36 +49,40 @@ namespace Assets.Scripts.Enemies.Map2
             maxHealth = 180f;
             currentHealth = maxHealth;
             defense = 40f;
-            isAwake = false; // Bắt đầu ở dạng Rương Báu đóng kín
+            isAwake = false;
+            attackRange = Mathf.Max(attackRange, 2.5f);
+
+            if (groundLayer.value == 0)
+            {
+                groundLayer = LayerMask.GetMask("Ground");
+            }
+            if (playerLayer.value == 0)
+            {
+                playerLayer = LayerMask.GetMask("Player");
+            }
         }
 
         void Update()
         {
-            // Tự động khôi phục máu nếu bị dính 0 từ Inspector
             if (currentHealth <= 0 && maxHealth > 0)
             {
                 currentHealth = maxHealth;
             }
 
-            if (playerScript == null || player == null)
-            {
-                playerScript = FindAnyObjectByType<Player>();
-                if (playerScript != null)
-                {
-                    player = playerScript.transform;
-                }
-            }
+            if (currentHealth <= 0) return;
+            if (!EnsurePlayerReference()) return;
 
-            if (player == null || playerScript == null) return;
-
-            float distanceToPlayer = Vector2.Distance((Vector2)transform.position, (Vector2)player.position);
+            float xDiff = player.position.x - transform.position.x;
+            float absXDiff = Mathf.Abs(xDiff);
+            float yDiff = Mathf.Abs(player.position.y - transform.position.y);
+            float distanceToPlayer = Vector2.Distance(transform.position, player.position);
 
             // 1. Nếu chưa thức giấc: Kiểm tra Musashi lại gần để mở rương biến hình
             if (!isAwake)
             {
-                if (rb != null) rb.velocity = Vector2.zero;
+                if (rb != null) rb.velocity = new Vector2(0, rb.velocity.y);
 
-                if (distanceToPlayer <= wakeRange && playerScript.currentHealth > 0)
+                if (distanceToPlayer <= wakeRange && yDiff <= 3.5f && playerScript.currentHealth > 0)
                 {
                     WakeUp();
                 }
@@ -86,11 +90,11 @@ namespace Assets.Scripts.Enemies.Map2
             }
 
             // 2. Sau khi đã thức giấc: Tấn công, Đuổi theo hoặc Đi tuần
-            if (distanceToPlayer <= attackRange && playerScript.currentHealth > 0)
+            if (absXDiff <= attackRange && yDiff <= 2.2f && playerScript.currentHealth > 0)
             {
                 AttackPlayer();
             }
-            else if (distanceToPlayer <= chaseRange && playerScript.currentHealth > 0)
+            else if (distanceToPlayer <= chaseRange && yDiff <= 4.5f && playerScript.currentHealth > 0)
             {
                 ChasePlayer();
             }
@@ -156,7 +160,7 @@ namespace Assets.Scripts.Enemies.Map2
             bool isWallHit = false;
             if (wallCheck != null)
             {
-                isWallHit = Physics2D.OverlapCircle(wallCheck.position, 0.15f, groundLayer);
+                isWallHit = Physics2D.OverlapCircle(wallCheck.position, 0.2f, groundLayer);
             }
 
             if ((groundCheck != null && !isGrounded) || isWallHit)
@@ -171,11 +175,11 @@ namespace Assets.Scripts.Enemies.Map2
 
             float xDiff = player.position.x - transform.position.x;
 
-            if (xDiff > 0.3f && !facingRight)
+            if (xDiff > 0.2f && !facingRight)
             {
                 Flip();
             }
-            else if (xDiff < -0.3f && facingRight)
+            else if (xDiff < -0.2f && facingRight)
             {
                 Flip();
             }
@@ -186,7 +190,7 @@ namespace Assets.Scripts.Enemies.Map2
 
         private void AttackPlayer()
         {
-            if (rb != null) rb.velocity = Vector2.zero;
+            if (rb != null) rb.velocity = new Vector2(0, rb.velocity.y);
             if (anim != null) anim.SetBool("isRunning", false);
 
             float xDiff = player.position.x - transform.position.x;
@@ -209,9 +213,7 @@ namespace Assets.Scripts.Enemies.Map2
                 }
                 TriggerAttackSound();
                 lastAttackTime = Time.time;
-                Debug.Log("Mimic attacking Musashi!");
 
-                // Tự động kích hoạt trừ máu Musashi sau 0.35 giây
                 StartCoroutine(DamageRoutine(0.35f));
             }
         }
@@ -228,10 +230,31 @@ namespace Assets.Scripts.Enemies.Map2
             if (hasDealtDamageThisAttack) return;
             hasDealtDamageThisAttack = true;
 
-            if (playerScript != null && playerScript.currentHealth > 0)
+            bool hit = false;
+            if (attackPoint != null)
             {
-                playerScript.TakeDamage(attackDamage);
-                Debug.Log("Mimic bit Musashi for " + attackDamage + " damage! Remaining HP: " + playerScript.currentHealth);
+                float rad = attackRadius > 0.2f ? attackRadius : 1.8f;
+                Collider2D[] hits = Physics2D.OverlapCircleAll(attackPoint.position, rad, playerLayer);
+                foreach (var col in hits)
+                {
+                    Player p = col.GetComponentInParent<Player>();
+                    if (p != null && p.currentHealth > 0)
+                    {
+                        p.TakeDamage(attackDamage);
+                        hit = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!hit && playerScript != null && playerScript.currentHealth > 0)
+            {
+                float absX = Mathf.Abs(player.position.x - transform.position.x);
+                float yDiff = Mathf.Abs(player.position.y - transform.position.y);
+                if (absX <= attackRange + 0.6f && yDiff <= 2.2f)
+                {
+                    playerScript.TakeDamage(attackDamage);
+                }
             }
         }
 

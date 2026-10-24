@@ -175,6 +175,14 @@ namespace Musashi.UI
             if (pauseMenuUI != null) pauseMenuUI.SetActive(false);
             if (pauseButtonObj != null) pauseButtonObj.SetActive(true);
 
+            // Hủy Player.instance hiện tại để khi reload lại scene, Player đặt sẵn trong scene
+            // sẽ được khởi tạo mới hoàn toàn ở vị trí ban đầu (spawn point), đầy đủ máu và chỉ số.
+            if (Player.instance != null)
+            {
+                Destroy(Player.instance.gameObject);
+                Player.instance = null;
+            }
+
             Scene activeScene = SceneManager.GetActiveScene();
             SceneManager.LoadScene(activeScene.name);
         }
@@ -198,6 +206,12 @@ namespace Musashi.UI
             IsPaused = false;
             if (pauseMenuUI != null) pauseMenuUI.SetActive(false);
             if (pauseButtonObj != null) pauseButtonObj.SetActive(false);
+
+            if (Player.instance != null)
+            {
+                Destroy(Player.instance.gameObject);
+                Player.instance = null;
+            }
 
             Canvas canvas = GetComponent<Canvas>();
             if (canvas != null)

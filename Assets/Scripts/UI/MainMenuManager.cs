@@ -24,11 +24,21 @@ namespace Musashi.UI
 
         public void PlayGame()
         {
+            if (Player.instance != null)
+            {
+                Destroy(Player.instance.gameObject);
+                Player.instance = null;
+            }
             SceneManager.LoadScene(defaultFirstMap);
         }
 
         public void LoadMap(string mapName)
         {
+            if (Player.instance != null)
+            {
+                Destroy(Player.instance.gameObject);
+                Player.instance = null;
+            }
             SceneManager.LoadScene(mapName);
         }
 
