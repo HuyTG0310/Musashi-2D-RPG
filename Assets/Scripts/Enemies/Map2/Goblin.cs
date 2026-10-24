@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 namespace Assets.Scripts.Enemies.Map2
@@ -6,10 +7,11 @@ namespace Assets.Scripts.Enemies.Map2
     {
         [Header("Goblin AI & Combat")]
         public float chaseRange = 6f;       // Tầm nhìn phát hiện người chơi
-        public float attackRange = 1.3f;    // Tầm đánh cận chiến
+        public float attackRange = 2.0f;    // Tầm đánh cận chiến (đủ lớn hơn khoảng cách va chạm vật lý)
         public float attackCooldown = 1.5f; // Thời gian hồi chiêu
         public float attackDamage = 25f;    // Sát thương đòn đánh
         private float lastAttackTime;
+        private bool hasDealtDamageThisAttack = false;
 
         [Header("Goblin Movement")]
         public bool facingRight = true;
@@ -23,7 +25,7 @@ namespace Assets.Scripts.Enemies.Map2
 
         [Header("Goblin Attack")]
         public Transform attackPoint;
-        public float attackRadius = 0.6f;
+        public float attackRadius = 1.5f;
         public LayerMask playerLayer;
 
         [Header("Goblin Audio")]
@@ -34,26 +36,43 @@ namespace Assets.Scripts.Enemies.Map2
             base.Start();
             facingRight = true;
             startX = transform.position.x;
-            moveSpeed = 3f + Random.Range(-0.3f, 0.5f);
+            moveSpeed = 3f + Random.Range(-0.2f, 0.3f);
             maxHealth = 120f;
             currentHealth = maxHealth;
             defense = 50f;
+            attackRange = Mathf.Max(attackRange, 2.0f);
+
+            if (groundLayer.value == 0)
+            {
+                groundLayer = LayerMask.GetMask("Ground");
+            }
+            if (playerLayer.value == 0)
+            {
+                playerLayer = LayerMask.GetMask("Player");
+            }
         }
 
         void Update()
         {
-            if (currentHealth <= 0 || player == null || playerScript == null) return;
+            if (currentHealth <= 0) return;
+            if (!EnsurePlayerReference()) return;
 
+            float xDiff = player.position.x - transform.position.x;
+            float absXDiff = Mathf.Abs(xDiff);
+            float yDiff = Mathf.Abs(player.position.y - transform.position.y);
             float distanceToPlayer = Vector2.Distance(transform.position, player.position);
 
-            if (distanceToPlayer <= attackRange && playerScript.currentHealth > 0)
+            // 1. Tấn công nếu trong tầm đánh ngang và cùng độ cao sàn
+            if (absXDiff <= attackRange && yDiff <= 2.2f && playerScript.currentHealth > 0)
             {
                 AttackPlayer();
             }
-            else if (distanceToPlayer <= chaseRange && playerScript.currentHealth > 0)
+            // 2. Đuổi theo nếu trong tầm nhìn
+            else if (distanceToPlayer <= chaseRange && yDiff <= 4.5f && playerScript.currentHealth > 0)
             {
                 ChasePlayer();
             }
+            // 3. Tuần tra bình thường
             else
             {
                 Patrol();
@@ -91,19 +110,19 @@ namespace Assets.Scripts.Enemies.Map2
                 }
             }
 
-            // 2. Kiểm tra xem groundLayer đã được chọn chưa (khác Nothing)
+            // 2. Kiểm tra xem groundLayer đã được chọn chưa
             if (groundLayer.value == 0) return;
 
             bool isGrounded = true;
             if (groundCheck != null)
             {
-                isGrounded = Physics2D.OverlapCircle(groundCheck.position, 0.25f, groundLayer);
+                isGrounded = Physics2D.OverlapCircle(groundCheck.position, 0.35f, groundLayer);
             }
 
             bool isWallHit = false;
             if (wallCheck != null)
             {
-                isWallHit = Physics2D.OverlapCircle(wallCheck.position, 0.15f, groundLayer);
+                isWallHit = Physics2D.OverlapCircle(wallCheck.position, 0.2f, groundLayer);
             }
 
             if ((groundCheck != null && !isGrounded) || isWallHit)
@@ -118,12 +137,11 @@ namespace Assets.Scripts.Enemies.Map2
 
             float xDiff = player.position.x - transform.position.x;
 
-            // Chỉ quay đầu khi khoảng cách X đủ lớn (> 0.3f) để tránh bị giật xoay tại chỗ
-            if (xDiff > 0.3f && !facingRight)
+            if (xDiff > 0.2f && !facingRight)
             {
                 Flip();
             }
-            else if (xDiff < -0.3f && facingRight)
+            else if (xDiff < -0.2f && facingRight)
             {
                 Flip();
             }
@@ -134,28 +152,66 @@ namespace Assets.Scripts.Enemies.Map2
 
         private void AttackPlayer()
         {
-            if (rb != null) rb.velocity = Vector2.zero;
+            if (rb != null) rb.velocity = new Vector2(0, rb.velocity.y);
             if (anim != null) anim.SetBool("isRunning", false);
+
+            float xDiff = player.position.x - transform.position.x;
+            if (xDiff > 0.1f && !facingRight)
+            {
+                Flip();
+            }
+            else if (xDiff < -0.1f && facingRight)
+            {
+                Flip();
+            }
 
             if (Time.time >= lastAttackTime + attackCooldown)
             {
+                hasDealtDamageThisAttack = false;
                 if (anim != null) anim.SetTrigger("attack");
+                TriggerAtkSound();
                 lastAttackTime = Time.time;
+                StartCoroutine(DamageRoutine(0.35f));
             }
         }
 
-        // Được gọi trong Animation Event của Animation Attack của Goblin
+        private IEnumerator DamageRoutine(float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            DealDamageToPlayer();
+        }
+
+        // Được gọi trong Animation Event của Goblin hoặc từ DamageRoutine
         public void DealDamageToPlayer()
         {
-            if (attackPoint == null) return;
-            Collider2D hitPlayer = Physics2D.OverlapCircle(attackPoint.position, attackRadius, playerLayer);
+            if (hasDealtDamageThisAttack) return;
+            hasDealtDamageThisAttack = true;
 
-            if (hitPlayer != null)
+            bool hit = false;
+            if (attackPoint != null)
             {
-                Player p = hitPlayer.GetComponent<Player>();
-                if (p != null)
+                float rad = attackRadius > 0.2f ? attackRadius : 1.5f;
+                Collider2D[] hits = Physics2D.OverlapCircleAll(attackPoint.position, rad, playerLayer);
+                foreach (var col in hits)
                 {
-                    p.TakeDamage(attackDamage);
+                    Player p = col.GetComponentInParent<Player>();
+                    if (p != null && p.currentHealth > 0)
+                    {
+                        p.TakeDamage(attackDamage);
+                        hit = true;
+                        break;
+                    }
+                }
+            }
+
+            // Dự phòng nếu OverlapCircle không chạm do lệch trục
+            if (!hit && playerScript != null && playerScript.currentHealth > 0)
+            {
+                float absX = Mathf.Abs(player.position.x - transform.position.x);
+                float yDiff = Mathf.Abs(player.position.y - transform.position.y);
+                if (absX <= attackRange + 0.6f && yDiff <= 2.2f)
+                {
+                    playerScript.TakeDamage(attackDamage);
                 }
             }
         }

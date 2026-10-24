@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -41,7 +41,7 @@ public class Player : MonoBehaviour
     public bool facingRight = true;
 
     [Header("Combat Stats")]
-    public float attackDamage = 100f;
+    public float attackDamage = 2000f;
     public float defensePower = 10f;
     public GameObject shurikenPrefab;
     public Transform firePoint;
@@ -87,6 +87,40 @@ public class Player : MonoBehaviour
         {
             Destroy(gameObject);
         }
+    }
+
+    private void OnEnable()
+    {
+        UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void OnDisable()
+    {
+        UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(UnityEngine.SceneManagement.Scene scene, UnityEngine.SceneManagement.LoadSceneMode mode)
+    {
+        audioManager = FindAnyObjectByType<AudioManager>();
+        RebindHUD();
+    }
+
+    public void RebindHUD()
+    {
+        if (hpFillImage == null || !hpFillImage.gameObject.activeInHierarchy)
+        {
+            GameObject hpObj = GameObject.Find("HealthBarFill");
+            if (hpObj != null) hpFillImage = hpObj.GetComponent<Image>();
+        }
+
+        if (spFillImage == null || !spFillImage.gameObject.activeInHierarchy)
+        {
+            GameObject spObj = GameObject.Find("StaminaBarFill");
+            if (spObj != null) spFillImage = spObj.GetComponent<Image>();
+        }
+
+        UpdateHealthUI();
+        UpdateStaminahUI();
     }
 
 
@@ -339,6 +373,12 @@ public class Player : MonoBehaviour
 
     private void UpdateHealthUI()
     {
+        if (hpFillImage == null || !hpFillImage.gameObject.activeInHierarchy)
+        {
+            GameObject hpObj = GameObject.Find("HealthBarFill");
+            if (hpObj != null) hpFillImage = hpObj.GetComponent<Image>();
+        }
+
         if (hpFillImage != null)
         {
             hpFillImage.fillAmount = currentHealth / maxHealth;
@@ -347,6 +387,12 @@ public class Player : MonoBehaviour
 
     private void UpdateStaminahUI()
     {
+        if (spFillImage == null || !spFillImage.gameObject.activeInHierarchy)
+        {
+            GameObject spObj = GameObject.Find("StaminaBarFill");
+            if (spObj != null) spFillImage = spObj.GetComponent<Image>();
+        }
+
         if (spFillImage != null)
         {
             spFillImage.fillAmount = currentStamina / maxStamina;
@@ -555,32 +601,27 @@ public class Player : MonoBehaviour
     }
     private void UseSakeGourd()
     {
-        if (Input.GetKeyDown(KeyCode.Alpha3) && sakeCount > 0 && currentStamina < maxStamina)
+        if (Input.GetKeyDown(KeyCode.Alpha3))
         {
-            sakeCount--; // Trừ 1 bình trong túi
-
-            // 1. Chạy Animation uống rượu (gọi tên trigger là "healing" theo đúng tên bạn đặt)
-            if (anim != null)
+            if (sakeCount > 0 && currentStamina < maxStamina)
             {
-                anim.SetTrigger("heal");
+                sakeCount--; // Trá»« 1 bÃ¬nh trong tÃºi
+
+                if (anim != null)
+                {
+                    anim.SetTrigger("heal");
+                }
+
+                currentStamina += 40;
+                if (currentStamina > maxStamina) currentStamina = maxStamina;
+
+                Debug.Log("ÄÃ£ uá»‘ng Sake! Sá»‘ bÃ¬nh cÃ²n láº¡i: " + sakeCount);
+                UpdateStaminahUI();
             }
-
-            // 2. Cập nhật chỉ số (Bạn chọn 1 trong 2 dòng dưới đây tùy ý định thiết kế)
-
-            // --> NẾU BẠN CHỌN HỒI SP:
-            currentStamina += 40;
-            if (currentStamina > maxStamina) currentStamina = maxStamina;
-
-            // --> NẾU BẠN CHỌN HỒI HP:
-            // currentHealth += 100; 
-            // if (currentHealth > maxHealth) currentHealth = maxHealth;
-
-            Debug.Log("Đã uống Sake! Số bình còn lại: " + sakeCount);
-            UpdateStaminahUI();
-        }
-        else
-        {
-            Debug.Log("Hết bình hồ lô rồi!");
+            else if (sakeCount <= 0)
+            {
+                Debug.Log("Háº¿t bÃ¬nh há»“ lÃ´ rá»“i!");
+            }
         }
     }
 

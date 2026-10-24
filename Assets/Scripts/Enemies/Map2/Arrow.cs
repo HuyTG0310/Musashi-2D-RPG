@@ -51,6 +51,9 @@ namespace Assets.Scripts.Enemies.Map2
 
         private void OnTriggerEnter2D(Collider2D collision)
         {
+            // Bỏ qua va chạm với bản thân quái vật
+            if (collision.GetComponentInParent<EnemyBase>() != null) return;
+
             // Kiểm tra xem có trúng Musashi (Player) không
             Player player = collision.GetComponent<Player>();
             if (player == null)

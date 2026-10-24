@@ -1,15 +1,41 @@
-﻿using Cinemachine;
+using Cinemachine;
 using UnityEngine;
 
 public class CameraAssign : MonoBehaviour
 {
+    private CinemachineVirtualCamera vcam;
+
+    void Awake()
+    {
+        vcam = GetComponent<CinemachineVirtualCamera>();
+    }
+
     void Start()
     {
-        // Khi Map 2 load xong, tự động tìm Musashi và gán vào mục tiêu Follow của Camera
-        if (Player.instance != null)
+        TryAssign();
+    }
+
+    void Update()
+    {
+        if (vcam != null && vcam.Follow == null)
         {
-            CinemachineVirtualCamera vcam = GetComponent<CinemachineVirtualCamera>();
+            TryAssign();
+        }
+    }
+
+    private void TryAssign()
+    {
+        if (Player.instance != null && vcam != null)
+        {
             vcam.Follow = Player.instance.transform;
+        }
+        else if (vcam != null && vcam.Follow == null)
+        {
+            Player p = FindAnyObjectByType<Player>();
+            if (p != null)
+            {
+                vcam.Follow = p.transform;
+            }
         }
     }
 }
