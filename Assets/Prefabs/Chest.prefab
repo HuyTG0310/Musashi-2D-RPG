@@ -146,24 +146,28 @@ MonoBehaviour:
   lootTable:
   - displayName: Xu
     type: 0
+    icon: {fileID: 21300000, guid: 2a159c6e0be72184ba073b56036fe506, type: 3}
     weight: 50
     minAmount: 5
     maxAmount: 15
     color: {r: 1, g: 0.85, b: 0.2, a: 1}
   - displayName: "T\xE1o"
     type: 1
+    icon: {fileID: -954541863, guid: efc807391a7f4664f9164405b35640cf, type: 3}
     weight: 25
     minAmount: 1
     maxAmount: 2
     color: {r: 1, g: 0.4, b: 0.4, a: 1}
   - displayName: "Phi ti\xEAu"
     type: 2
+    icon: {fileID: 21300000, guid: 6317755a9be13eb4cb4063e681cf1ce7, type: 3}
     weight: 15
     minAmount: 2
     maxAmount: 5
     color: {r: 0.7, g: 0.85, b: 1, a: 1}
   - displayName: Sake
     type: 3
+    icon: {fileID: 21300000, guid: 56fe122cfad9bc04d866535f5d36148c, type: 3}
     weight: 10
     minAmount: 1
     maxAmount: 1
@@ -176,13 +180,24 @@ MonoBehaviour:
   spriteRenderer: {fileID: 2178391874504080120}
   closedSprite: {fileID: 21300000, guid: d2e788fc3209f2d41bdc784425d07485, type: 3}
   openedSprite: {fileID: 21300000, guid: dadfeea62e5e349488d82a979a299d45, type: 3}
-  promptUI: {fileID: 0}
   openSound: {fileID: 0}
-  notificationFont: {fileID: 0}
-  notificationSize: 3
-  textSortingLayer: 
-  textSortingOrder: 1000
+  sparkle: 1
+  sparkleCount: 6
+  sparkleColor: {r: 1, g: 0.95, b: 0.6, a: 1}
+  sparkleScale: 1
+  sparkleLifetime: {x: 0.7, y: 1.3}
+  sparkleAfterOpen: 1
+  burstOnOpen: 1
+  promptUI: {fileID: 0}
+  promptText: Click {key} to claim
+  promptSize: 4
+  promptOffset: 0.5
+  promptFont: {fileID: 0}
+  iconSize: 0.9
+  iconSpacing: 1.2
+  showAmount: 1
+  amountSize: 3
   floatHeight: 1.2
   floatDuration: 1.8
-  notificationText: {fileID: 0}
-  notificationTime: 2
+  uiSortingOrder: 1000
+  popupSortingLayer: 

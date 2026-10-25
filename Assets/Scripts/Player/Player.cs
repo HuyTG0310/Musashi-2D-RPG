@@ -85,6 +85,8 @@ public class Player : MonoBehaviour
         }
         else if (instance != this)
         {
+            // Da co Musashi tu scene truoc (DontDestroyOnLoad).
+            // Huy ban nay trong scene moi, giu Musashi cu voi day du trang thai (HP, items...).
             Destroy(gameObject);
         }
     }
