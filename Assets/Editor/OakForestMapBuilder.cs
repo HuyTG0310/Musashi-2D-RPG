@@ -334,6 +334,22 @@ public static class OakForestMapBuilder
             ti.spriteImportMode = SpriteImportMode.Single;
             dirty = true;
         }
+        if (path.Contains("Background"))
+        {
+            if (ti.wrapMode != TextureWrapMode.Repeat)
+            {
+                ti.wrapMode = TextureWrapMode.Repeat;
+                dirty = true;
+            }
+            var settings = new TextureImporterSettings();
+            ti.ReadTextureSettings(settings);
+            if (settings.spriteMeshType != SpriteMeshType.FullRect)
+            {
+                settings.spriteMeshType = SpriteMeshType.FullRect;
+                ti.SetTextureSettings(settings);
+                dirty = true;
+            }
+        }
         if (dirty)
         {
             ti.SaveAndReimport();
@@ -385,6 +401,18 @@ public static class OakForestMapBuilder
         sr.sprite = sprite;
         sr.sortingLayerName = sortingLayer;
         sr.sortingOrder = order;
+
+        // Nếu là shop, gắn Animator để phát animation rèm cửa/đèn buôn bán
+        if (spriteName == "shop")
+        {
+            var controller = AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>("Assets/Animations/Enemies/Shop.controller");
+            if (controller != null)
+            {
+                var anim = go.AddComponent<Animator>();
+                anim.runtimeAnimatorController = controller;
+            }
+        }
+
         // Decor is imported at 32 PPU, tiles at 24 PPU -> scale so pixels match.
         float scale = sprite.pixelsPerUnit / (float)TilePx;
         go.transform.localScale = Vector3.one * scale;
@@ -398,57 +426,51 @@ public static class OakForestMapBuilder
     {
         var bgRoot = new GameObject("Background").transform;
         bgRoot.SetParent(root);
-        for (int i = 1; i <= 3; i++)
-        {
-            var sprite = LoadFirstSprite(BgDir + $"background_layer_{i}.png");
-            if (sprite == null) continue;
-            var layer = new GameObject("BG" + i).transform;
-            layer.SetParent(bgRoot);
-            float scale = H / sprite.bounds.size.y;
-            float width = sprite.bounds.size.x * scale;
-            for (float x = 0; x < W + width; x += width)
-            {
-                var go = new GameObject("part");
-                go.transform.SetParent(layer);
-                var sr = go.AddComponent<SpriteRenderer>();
-                sr.sprite = sprite;
-                sr.sortingLayerName = "Background";
-                sr.sortingOrder = i - 1;
-                go.transform.localScale = Vector3.one * scale;
-                go.transform.position = new Vector3(
-                    x + width / 2f - sprite.bounds.center.x * scale,
-                    H / 2f - sprite.bounds.center.y * scale, 0);
-            }
+        bgRoot.localPosition = Vector3.zero;
 
-            // Gán hiệu ứng chuyển động gió và parallax cho background
-            var sway = layer.gameObject.AddComponent<BackgroundWindSway>();
-            if (i == 1)
-            {
-                // BG1: Bầu trời & mây trôi
-                sway.enableWindSway = false;
-                sway.parallaxFactor = 0.05f;
-                sway.constantDriftSpeed = 0.035f;
-            }
-            else if (i == 2)
-            {
-                // BG2: Rặng cây xa
-                sway.enableWindSway = true;
-                sway.parallaxFactor = 0.20f;
-                sway.swaySpeed = 0.95f;
-                sway.swayAmountX = 0.10f;
-                sway.swayAmountY = 0.02f;
-                sway.swayRotationAngle = 0.35f;
-            }
-            else if (i == 3)
-            {
-                // BG3: Hàng cây sồi phía trước với tán lá đung đưa trong gió
-                sway.enableWindSway = true;
-                sway.parallaxFactor = 0.45f;
-                sway.swaySpeed = 1.30f;
-                sway.swayAmountX = 0.25f;
-                sway.swayAmountY = 0.06f;
-                sway.swayRotationAngle = 0.90f;
-            }
+        // Chiều cao map là H (50) và camera confiner lên tới H + 6 (56)
+        // Sprite background gốc 320x180 px ở 16 PPU có chiều cao 11.25 units
+        // Để phủ trọn vẹn từ Y=0 đến Y=56: scale = 5.2f (11.25 * 5.2 = 58.5 units)
+        // Tọa độ Y đặt tại 58.5f / 2f = 29.25f để đáy sprite vừa vặn chạm mốc Y=0
+        float scale = 5.2f;
+        float targetY = (11.25f * scale) / 2f; // 29.25f
+        float tiledWidth = 500f; // Trải dài 500 units theo chiều ngang (drawMode = Tiled)
+
+        Camera mainCam = Camera.main;
+        if (mainCam == null) mainCam = Object.FindFirstObjectByType<Camera>();
+        GameObject camGo = mainCam != null ? mainCam.gameObject : null;
+
+        // Cấu hình giống hệt Map 1: 3 layer BG1, BG2, BG3
+        // Mỗi layer là 1 GameObject duy nhất (không chia ra từng part con), trải dài toàn map với DrawMode = Tiled
+        // Gắn BackgroundController để parallax mượt mà theo camera
+        var layers = new[]
+        {
+            new { name = "BG1", spriteFile = "background_layer_1.png", order = 0, parallax = 1.0f },
+            new { name = "BG2", spriteFile = "background_layer_2.png", order = 1, parallax = 0.6f },
+            new { name = "BG3", spriteFile = "background_layer_3.png", order = 2, parallax = 0.3f }
+        };
+
+        foreach (var l in layers)
+        {
+            var sprite = LoadFirstSprite(BgDir + l.spriteFile);
+            if (sprite == null) continue;
+
+            var go = new GameObject(l.name);
+            go.transform.SetParent(bgRoot);
+            go.transform.position = new Vector3(0f, targetY, 0f);
+            go.transform.localScale = new Vector3(scale, scale, 1f);
+
+            var sr = go.AddComponent<SpriteRenderer>();
+            sr.sprite = sprite;
+            sr.drawMode = SpriteDrawMode.Tiled;
+            sr.tileMode = SpriteTileMode.Continuous;
+            sr.size = new Vector2(tiledWidth, sprite.rect.height / sprite.pixelsPerUnit);
+            sr.sortingLayerName = "Background";
+            sr.sortingOrder = l.order;
+
+            var controller = go.AddComponent<BackgroundController>();
+            controller.cam = camGo;
+            controller.parallaxEffect = l.parallax;
         }
     }
 
