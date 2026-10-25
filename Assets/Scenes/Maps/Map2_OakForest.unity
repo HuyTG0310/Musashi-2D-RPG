@@ -954,6 +954,7 @@ GameObject:
   m_Component:
   - component: {fileID: 122189832}
   - component: {fileID: 122189833}
+  - component: {fileID: 122189834}
   m_Layer: 2
   m_Name: shop 1
   m_TagString: Untagged
@@ -12522,11 +12523,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   targetCamera: {fileID: 859847757}
   parallaxFactor: 0.2
-  enableWindSway: 1
+  enableWindSway: 0
   swaySpeed: 0.95
-  swayAmountX: 0.1
-  swayAmountY: 0.02
-  swayRotationAngle: 0.35
+  swayAmountX: 0
+  swayAmountY: 0
+  swayRotationAngle: 0
   waveFrequency: 0.08
   constantDriftSpeed: 0
   parts:
@@ -108704,6 +108705,8 @@ Transform:
   - {fileID: 1359187338}
   - {fileID: 474708573}
   - {fileID: 1174506985}
+  - {fileID: 950000002}
+  - {fileID: 950000011}
   m_Father: {fileID: 998795792}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -113976,11 +113979,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   targetCamera: {fileID: 859847757}
   parallaxFactor: 0.45
-  enableWindSway: 1
+  enableWindSway: 0
   swaySpeed: 1.3
-  swayAmountX: 0.25
-  swayAmountY: 0.06
-  swayRotationAngle: 0.9
+  swayAmountX: 0
+  swayAmountY: 0
+  swayRotationAngle: 0
   waveFrequency: 0.08
   constantDriftSpeed: 0
   parts:
@@ -115189,9 +115192,9 @@ MonoBehaviour:
   parallaxFactor: 0.05
   enableWindSway: 0
   swaySpeed: 1.2
-  swayAmountX: 0.18
-  swayAmountY: 0.04
-  swayRotationAngle: 0.75
+  swayAmountX: 0
+  swayAmountY: 0
+  swayRotationAngle: 0
   waveFrequency: 0.08
   constantDriftSpeed: 0.035
   parts:
@@ -121039,3 +121042,111 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c6b59f7da7222594a872526b0cb65723, type: 3}
+
+--- !u!95 &122189834
+Animator:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 122189831}
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: a183c1ad42a13cd4bad9b153ece9e25e, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
+
+--- !u!1 &950000001
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 950000002}
+  - component: {fileID: 950000003}
+  m_Layer: 0
+  m_Name: LeafWindEffect
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &950000002
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 950000001}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 550356959}
+  m_RootOrder: -1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &950000003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 950000001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68bf1a2d591845bb8c9be740e53a9101, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetCamera: {fileID: 859847757}
+  leafCount: 45
+  spawnAreaWidth: 42
+  spawnAreaHeight: 26
+  windSpeedX: 2.4
+  fallSpeedY: 1.1
+  flutterSpeed: 7
+  waveAmplitude: 0.35
+  waveFrequency: 1.6
+  leafSprites: []
+--- !u!1 &950000010
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 950000011}
+  m_Layer: 0
+  m_Name: CanopyLeaves
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &950000011
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 950000010}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 550356959}
+  m_RootOrder: -1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

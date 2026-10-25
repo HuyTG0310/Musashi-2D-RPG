@@ -385,6 +385,18 @@ public static class OakForestMapBuilder
         sr.sprite = sprite;
         sr.sortingLayerName = sortingLayer;
         sr.sortingOrder = order;
+
+        // Nếu là shop, gắn Animator để phát animation rèm cửa/đèn buôn bán
+        if (spriteName == "shop")
+        {
+            var controller = AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>("Assets/Animations/Enemies/Shop.controller");
+            if (controller != null)
+            {
+                var anim = go.AddComponent<Animator>();
+                anim.runtimeAnimatorController = controller;
+            }
+        }
+
         // Decor is imported at 32 PPU, tiles at 24 PPU -> scale so pixels match.
         float scale = sprite.pixelsPerUnit / (float)TilePx;
         go.transform.localScale = Vector3.one * scale;
@@ -420,34 +432,63 @@ public static class OakForestMapBuilder
                     H / 2f - sprite.bounds.center.y * scale, 0);
             }
 
-            // Gán hiệu ứng chuyển động gió và parallax cho background
+            // Background cố định, không đung đưa rung lắc cả thế giới; giữ parallax tự nhiên theo camera
             var sway = layer.gameObject.AddComponent<BackgroundWindSway>();
+            sway.enableWindSway = false;
+            sway.swayAmountX = 0f;
+            sway.swayAmountY = 0f;
+            sway.swayRotationAngle = 0f;
+
             if (i == 1)
             {
-                // BG1: Bầu trời & mây trôi
-                sway.enableWindSway = false;
+                // BG1: Bầu trời & mây trôi nhẹ
                 sway.parallaxFactor = 0.05f;
                 sway.constantDriftSpeed = 0.035f;
             }
             else if (i == 2)
             {
                 // BG2: Rặng cây xa
-                sway.enableWindSway = true;
                 sway.parallaxFactor = 0.20f;
-                sway.swaySpeed = 0.95f;
-                sway.swayAmountX = 0.10f;
-                sway.swayAmountY = 0.02f;
-                sway.swayRotationAngle = 0.35f;
             }
             else if (i == 3)
             {
-                // BG3: Hàng cây sồi phía trước với tán lá đung đưa trong gió
-                sway.enableWindSway = true;
+                // BG3: Hàng cây sồi gần
                 sway.parallaxFactor = 0.45f;
-                sway.swaySpeed = 1.30f;
-                sway.swayAmountX = 0.25f;
-                sway.swayAmountY = 0.06f;
-                sway.swayRotationAngle = 0.90f;
+            }
+        }
+
+        // 1. Hệ thống lá sồi bay/rơi theo gió (Leaf Wind Effect)
+        var leafGo = new GameObject("LeafWindEffect");
+        leafGo.transform.SetParent(bgRoot);
+        var leafEffect = leafGo.AddComponent<OakLeafWindEffect>();
+        leafEffect.leafCount = 45;
+        leafEffect.spawnAreaWidth = 42f;
+        leafEffect.spawnAreaHeight = 26f;
+        leafEffect.windSpeedX = 2.4f;
+        leafEffect.fallSpeedY = 1.1f;
+        leafEffect.flutterSpeed = 7.0f;
+
+        // 2. Các chùm lá sồi rủ trên tán cây (Canopy Leaves Rustle)
+        var canopyClusterSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/VFX/canopy_leaf_cluster.png");
+        if (canopyClusterSprite != null)
+        {
+            var canopyRoot = new GameObject("CanopyLeaves").transform;
+            canopyRoot.SetParent(bgRoot);
+            for (float cx = 4f; cx < W; cx += 10f)
+            {
+                var cGo = new GameObject($"canopy_rustle_{Mathf.RoundToInt(cx)}");
+                cGo.transform.SetParent(canopyRoot);
+                var cSr = cGo.AddComponent<SpriteRenderer>();
+                cSr.sprite = canopyClusterSprite;
+                cSr.sortingLayerName = "Background";
+                cSr.sortingOrder = 3;
+                cGo.transform.localScale = Vector3.one * 1.5f;
+                float cy = H - 8f + Mathf.Sin(cx * 0.3f) * 1.5f;
+                cGo.transform.position = new Vector3(cx, cy, 0f);
+                var rustle = cGo.AddComponent<CanopyLeafRustle>();
+                rustle.rustleSpeed = 1.8f;
+                rustle.maxTiltAngle = 4.0f;
+                rustle.waveOffset = cx * 0.2f;
             }
         }
     }
