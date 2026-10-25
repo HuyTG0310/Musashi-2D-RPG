@@ -341,9 +341,12 @@ public static class OakForestMapBuilder
                 ti.wrapMode = TextureWrapMode.Repeat;
                 dirty = true;
             }
-            if (ti.spriteMeshType != SpriteMeshType.FullRect)
+            var settings = new TextureImporterSettings();
+            ti.ReadTextureSettings(settings);
+            if (settings.spriteMeshType != SpriteMeshType.FullRect)
             {
-                ti.spriteMeshType = SpriteMeshType.FullRect;
+                settings.spriteMeshType = SpriteMeshType.FullRect;
+                ti.SetTextureSettings(settings);
                 dirty = true;
             }
         }
