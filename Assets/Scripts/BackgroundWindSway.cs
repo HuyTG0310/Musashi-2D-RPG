@@ -14,11 +14,11 @@ public class BackgroundWindSway : MonoBehaviour
     private bool initialized = false;
 
     [Header("Wind Sway Settings")]
-    public bool enableWindSway = true;
-    public float swaySpeed = 1.2f;
-    public float swayAmountX = 0.18f;
-    public float swayAmountY = 0.04f;
-    public float swayRotationAngle = 0.75f; // degrees of gentle swaying tilt
+    public bool enableWindSway = false;
+    public float swaySpeed = 1.0f;
+    public float swayAmountX = 0f;
+    public float swayAmountY = 0f;
+    public float swayRotationAngle = 0f; // degrees of gentle swaying tilt
     public float waveFrequency = 0.08f;    // wave spread across parts
 
     [Header("Constant Drift (e.g. Clouds / Sky)")]
@@ -89,26 +89,39 @@ public class BackgroundWindSway : MonoBehaviour
             driftOffset += constantDriftSpeed * (Application.isPlaying ? Time.deltaTime : 0.016f);
         }
 
-        // 3. Natural wind sway on children parts
-        if (enableWindSway && parts != null)
+        // 3. Natural wind sway on children parts (if enabled)
+        if (parts != null)
         {
-            float currentTime = Application.isPlaying ? Time.time : (float)(System.DateTime.Now.TimeOfDay.TotalSeconds);
-            float t = currentTime * swaySpeed;
-
-            for (int i = 0; i < parts.Length; i++)
+            if (enableWindSway && (swayAmountX > 0f || swayAmountY > 0f || swayRotationAngle > 0f))
             {
-                if (parts[i].transform == null) continue;
+                float currentTime = Application.isPlaying ? Time.time : (float)(System.DateTime.Now.TimeOfDay.TotalSeconds);
+                float t = currentTime * swaySpeed;
 
-                float phase = parts[i].phaseOffset;
-                // Dual-sine wave for organic wind feeling
-                float wave = Mathf.Sin(t + phase) * 0.75f + Mathf.Sin(t * 1.37f + phase * 1.5f) * 0.25f;
+                for (int i = 0; i < parts.Length; i++)
+                {
+                    if (parts[i].transform == null) continue;
 
-                float offsetX = wave * swayAmountX + driftOffset;
-                float offsetY = Mathf.Cos(t * 0.8f + phase) * swayAmountY;
-                float rotZ = wave * swayRotationAngle;
+                    float phase = parts[i].phaseOffset;
+                    // Dual-sine wave for organic wind feeling
+                    float wave = Mathf.Sin(t + phase) * 0.75f + Mathf.Sin(t * 1.37f + phase * 1.5f) * 0.25f;
 
-                parts[i].transform.localPosition = parts[i].baseLocalPos + new Vector3(offsetX, offsetY, 0f);
-                parts[i].transform.localRotation = Quaternion.Euler(0f, 0f, rotZ);
+                    float offsetX = wave * swayAmountX + driftOffset;
+                    float offsetY = Mathf.Cos(t * 0.8f + phase) * swayAmountY;
+                    float rotZ = wave * swayRotationAngle;
+
+                    parts[i].transform.localPosition = parts[i].baseLocalPos + new Vector3(offsetX, offsetY, 0f);
+                    parts[i].transform.localRotation = Quaternion.Euler(0f, 0f, rotZ);
+                }
+            }
+            else
+            {
+                // Ensure parts remain solidly stationary and untilted
+                for (int i = 0; i < parts.Length; i++)
+                {
+                    if (parts[i].transform == null) continue;
+                    parts[i].transform.localPosition = parts[i].baseLocalPos + new Vector3(driftOffset, 0f, 0f);
+                    parts[i].transform.localRotation = Quaternion.identity;
+                }
             }
         }
     }
