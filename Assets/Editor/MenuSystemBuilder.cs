@@ -124,9 +124,29 @@ namespace Musashi.EditorTools
             }
             SetFullStretch(bgObj.GetComponent<RectTransform>());
 
-            // 5. MainMenuController
+            // 5. MainMenuController & Audio
             GameObject controllerObj = new GameObject("MainMenuController");
             MainMenuManager mainMgr = controllerObj.AddComponent<MainMenuManager>();
+            AudioSource sfxSource = controllerObj.AddComponent<AudioSource>();
+            sfxSource.playOnAwake = false;
+            sfxSource.loop = false;
+            sfxSource.spatialBlend = 0f;
+            sfxSource.ignoreListenerPause = true;
+
+            GameObject menuAudioObj = new GameObject("MenuAudio");
+            AudioSource bgmSource = menuAudioObj.AddComponent<AudioSource>();
+            bgmSource.playOnAwake = true;
+            bgmSource.loop = true;
+            bgmSource.spatialBlend = 0f;
+            bgmSource.volume = 0.8f;
+            AudioClip bgmClip = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/BGM/Frost Waltz (Alternate).mp3");
+            if (bgmClip != null) bgmSource.clip = bgmClip;
+
+            AudioClip menuClickClip = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audio/SFX/mouse_click.mp3");
+            if (menuClickClip == null)
+            {
+                menuClickClip = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Resources/Audio/mouse_click.mp3");
+            }
 
             // --- 6. MainPanel ---
             GameObject mainPanel = CreateUIElement("MainPanel", canvasObj.transform);
@@ -423,6 +443,9 @@ namespace Musashi.EditorTools
             soMain.FindProperty("howToPlayPanel").objectReferenceValue = howToPlayPanel;
             soMain.FindProperty("settingsPanel").objectReferenceValue = settingsPanel;
             soMain.FindProperty("aboutUsPanel").objectReferenceValue = aboutUsPanel;
+            if (soMain.FindProperty("bgmAudioSource") != null) soMain.FindProperty("bgmAudioSource").objectReferenceValue = bgmSource;
+            if (soMain.FindProperty("sfxAudioSource") != null) soMain.FindProperty("sfxAudioSource").objectReferenceValue = sfxSource;
+            if (soMain.FindProperty("buttonClickClip") != null && menuClickClip != null) soMain.FindProperty("buttonClickClip").objectReferenceValue = menuClickClip;
             soMain.ApplyModifiedProperties();
 
             SerializedObject soSet = new SerializedObject(settingsMgr);

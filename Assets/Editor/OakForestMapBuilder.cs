@@ -63,8 +63,8 @@ public static class OakForestMapBuilder
 
         var decorRoot = new GameObject("Decor").transform;
         decorRoot.SetParent(root.transform);
+        var decorItems = new List<DecorItem>();
         var rng = new System.Random(7);
-        int decorPlacedCount = 0;
 
         for (int y = 0; y < H; y++)
         for (int x = 0; x < W; x++)
@@ -114,25 +114,27 @@ public static class OakForestMapBuilder
                     break;
                 default:
                 {
-                    string name = DecorName(c, rng);
-                    if (name != null)
+                    var item = CreateDecorItem(c, x, H - 1 - y, rng);
+                    if (item != null)
                     {
-                        int order = (c == 'g') ? 2 : 1;
-                        PlaceDecor(decorRoot, name, x, H - 1 - y, order, "Ground");
-                        decorPlacedCount++;
+                        decorItems.Add(item);
                     }
                     break;
                 }
             }
         }
 
+        BuildOrganizedDecor(decorRoot, decorItems);
+        int decorPlacedCount = decorItems.Count;
+
         ground.CompressBounds(); plats.CompressBounds(); back.CompressBounds();
         BuildBackground(root.transform, W, H);
         SetupCamera(root.transform, W, H);
+        SetupTrapsAndPillars(root.transform);
 
         EditorSceneManager.MarkSceneDirty(root.scene);
         Selection.activeGameObject = root;
-        Debug.Log($"Oak Forest map built: {W}x{H} tiles with {decorPlacedCount} decors (cột đèn, hàng rào, đá, biển, cỏ, shop). Player moved to PlayerSpawn.");
+        Debug.Log($"Oak Forest map built: {W}x{H} tiles with {decorPlacedCount} decors arranged into folders from left to right. Player moved to PlayerSpawn.");
     }
 
     static void HideOldMap()
@@ -215,19 +217,37 @@ public static class OakForestMapBuilder
         Debug.Log(hooked > 0 ? $"Đã gán CameraBounds mới cho {hooked} confiner." : "Không tìm thấy Cinemachine Confiner.");
     }
 
-    static string DecorName(char c, System.Random rng)
+    class DecorItem
+    {
+        public char symbol;
+        public string spriteName;
+        public string categoryFolder; // "Lamp", "Rock", "Fence", "Grass", "Sign", "Shop"
+        public string prefix;         // "lamp", "rock", "fence", "grass", "sign", "shop"
+        public int cellX;
+        public int cellY;
+        public int order;
+    }
+
+    static DecorItem CreateDecorItem(char c, int cellX, int cellY, System.Random rng)
     {
         switch (c)
         {
-            case 'L': return "lamp";
-            case 'F': return "fence_1";
-            case 'f': return "fence_2";
-            case 'S': return "sign";
-            case 'H': return "shop";
-            case '1': return "rock_1";
-            case '2': return "rock_2";
-            case '3': return "rock_3";
-            case 'g': return "grass_" + rng.Next(1, 4);
+            case 'L':
+                return new DecorItem { symbol = c, spriteName = "lamp", categoryFolder = "Lamp", prefix = "lamp", cellX = cellX, cellY = cellY, order = 1 };
+            case '1':
+            case '2':
+            case '3':
+                return new DecorItem { symbol = c, spriteName = "rock_" + c, categoryFolder = "Rock", prefix = "rock", cellX = cellX, cellY = cellY, order = 1 };
+            case 'F':
+                return new DecorItem { symbol = c, spriteName = "fence_1", categoryFolder = "Fence", prefix = "fence", cellX = cellX, cellY = cellY, order = 1 };
+            case 'f':
+                return new DecorItem { symbol = c, spriteName = "fence_2", categoryFolder = "Fence", prefix = "fence", cellX = cellX, cellY = cellY, order = 1 };
+            case 'g':
+                return new DecorItem { symbol = c, spriteName = "grass_" + rng.Next(1, 4), categoryFolder = "Grass", prefix = "grass", cellX = cellX, cellY = cellY, order = 2 };
+            case 'S':
+                return new DecorItem { symbol = c, spriteName = "sign", categoryFolder = "Sign", prefix = "sign", cellX = cellX, cellY = cellY, order = 1 };
+            case 'H':
+                return new DecorItem { symbol = c, spriteName = "shop", categoryFolder = "Shop", prefix = "shop", cellX = cellX, cellY = cellY, order = 1 };
         }
         return null;
     }
@@ -328,12 +348,39 @@ public static class OakForestMapBuilder
         return AssetDatabase.LoadAllAssetsAtPath(path).OfType<Sprite>().OrderBy(x => x.name).FirstOrDefault();
     }
 
-    static void PlaceDecor(Transform parent, string name, int cellX, int cellY, int order, string sortingLayer = "Ground")
+    static void BuildOrganizedDecor(Transform decorRoot, List<DecorItem> decorItems)
     {
-        var sprite = LoadFirstSprite(DecorDir + name + ".png");
-        if (sprite == null) { Debug.LogWarning("Missing decor " + name); return; }
-        var go = new GameObject(name);
+        var categories = new[] { "Lamp", "Rock", "Fence", "Grass", "Sign", "Shop" };
+        foreach (var cat in categories)
+        {
+            var itemsInCat = decorItems
+                .Where(d => d.categoryFolder == cat)
+                .OrderBy(d => d.cellX)
+                .ThenBy(d => d.cellY)
+                .ToList();
+
+            if (itemsInCat.Count == 0) continue;
+
+            var folderGo = new GameObject(cat);
+            folderGo.transform.SetParent(decorRoot);
+
+            for (int i = 0; i < itemsInCat.Count; i++)
+            {
+                var item = itemsInCat[i];
+                string objectName = $"{item.prefix} {i + 1}";
+                PlaceDecor(folderGo.transform, item.spriteName, objectName, item.cellX, item.cellY, item.order, "Ground");
+            }
+        }
+    }
+
+    static void PlaceDecor(Transform parent, string spriteName, string objectName, int cellX, int cellY, int order, string sortingLayer = "Ground")
+    {
+        var sprite = LoadFirstSprite(DecorDir + spriteName + ".png");
+        if (sprite == null) { Debug.LogWarning("Missing decor sprite " + spriteName); return; }
+        var go = new GameObject(objectName);
         go.transform.SetParent(parent);
+        int ignoreRaycast = LayerMask.NameToLayer("Ignore Raycast");
+        if (ignoreRaycast >= 0) go.layer = ignoreRaycast;
         var sr = go.AddComponent<SpriteRenderer>();
         sr.sprite = sprite;
         sr.sortingLayerName = sortingLayer;
@@ -371,6 +418,83 @@ public static class OakForestMapBuilder
                 go.transform.position = new Vector3(
                     x + width / 2f - sprite.bounds.center.x * scale,
                     H / 2f - sprite.bounds.center.y * scale, 0);
+            }
+
+            // Gán hiệu ứng chuyển động gió và parallax cho background
+            var sway = layer.gameObject.AddComponent<BackgroundWindSway>();
+            if (i == 1)
+            {
+                // BG1: Bầu trời & mây trôi
+                sway.enableWindSway = false;
+                sway.parallaxFactor = 0.05f;
+                sway.constantDriftSpeed = 0.035f;
+            }
+            else if (i == 2)
+            {
+                // BG2: Rặng cây xa
+                sway.enableWindSway = true;
+                sway.parallaxFactor = 0.20f;
+                sway.swaySpeed = 0.95f;
+                sway.swayAmountX = 0.10f;
+                sway.swayAmountY = 0.02f;
+                sway.swayRotationAngle = 0.35f;
+            }
+            else if (i == 3)
+            {
+                // BG3: Hàng cây sồi phía trước với tán lá đung đưa trong gió
+                sway.enableWindSway = true;
+                sway.parallaxFactor = 0.45f;
+                sway.swaySpeed = 1.30f;
+                sway.swayAmountX = 0.25f;
+                sway.swayAmountY = 0.06f;
+                sway.swayRotationAngle = 0.90f;
+            }
+        }
+    }
+
+    static void SetupTrapsAndPillars(Transform root)
+    {
+        // 1. Đặt các bẫy gai (Wood_Trap) nằm gọn trong hố đất, đầu chông ngang mặt đất theo hình 4
+        var trapPositions = new Dictionary<string, Vector3>
+        {
+            { "Wood_Trap (6)", new Vector3(145.0f, 37.0f, 0f) },
+            { "Wood_Trap (7)", new Vector3(164.0f, 37.0f, 0f) },
+            { "Wood_Trap (4)", new Vector3(63.0f, 16.0f, 0f) },
+            { "Wood_Trap (5)", new Vector3(71.0f, 8.0f, 0f) },
+            { "Wood_Trap (8)", new Vector3(237.0f, 14.0f, 0f) },
+            { "Wood_Trap (3)", new Vector3(275.0f, 29.0f, 0f) },
+            { "Wood_Trap (1)", new Vector3(287.0f, 6.0f, 0f) },
+            { "Wood_Trap (2)", new Vector3(292.0f, 6.0f, 0f) },
+            { "Wood_Trap (9)", new Vector3(319.0f, 28.0f, 0f) },
+            { "Wood_Trap (10)", new Vector3(352.0f, 14.0f, 0f) },
+            { "Wood_Trap (11)", new Vector3(360.0f, 14.0f, 0f) }
+        };
+
+        foreach (var trap in Object.FindObjectsOfType<Trap>(true))
+        {
+            if (trapPositions.TryGetValue(trap.gameObject.name, out var pos))
+            {
+                Undo.RecordObject(trap.transform, "Position Trap");
+                trap.transform.position = pos;
+            }
+        }
+
+        // 2. Bố trí 3 trụ đá phun lửa bậc thang theo hình 5
+        var cratePositions = new Dictionary<string, Vector3>
+        {
+            { "Wooden_Crate_Box (4)", new Vector3(227.5f, 14.5f, 0f) }, // Trụ 1 (Cao 1 block)
+            { "Wooden_Crate_Box (3)", new Vector3(230.5f, 15.5f, 0f) }, // Trụ 2 (Cao 2 block)
+            { "Wooden_Crate_Box (1)", new Vector3(233.5f, 16.5f, 0f) }, // Trụ 3 (Cao 3 block)
+            { "Wooden_Crate_Box (2)", new Vector3(58.5f, 16.5f, 0f) },
+            { "Wooden_Crate_Box (5)", new Vector3(314.5f, 28.5f, 0f) }
+        };
+
+        foreach (var ft in Object.FindObjectsOfType<FlameTrap>(true))
+        {
+            if (cratePositions.TryGetValue(ft.gameObject.name, out var pos))
+            {
+                Undo.RecordObject(ft.transform, "Position FlameTrap");
+                ft.transform.position = pos;
             }
         }
     }
