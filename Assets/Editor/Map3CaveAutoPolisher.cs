@@ -74,17 +74,29 @@ public static class Map3CaveAutoPolisher
             return;
         }
 
-        var tileBlack = AssetDatabase.LoadAssetAtPath<TileBase>(TilePath_Black);
-        var tileTop1 = AssetDatabase.LoadAssetAtPath<TileBase>(TilePath_Top1);
-        var tileTop2 = AssetDatabase.LoadAssetAtPath<TileBase>(TilePath_Top2);
-        var tileRimL = AssetDatabase.LoadAssetAtPath<TileBase>(TilePath_RimL);
-        var tileRimR = AssetDatabase.LoadAssetAtPath<TileBase>(TilePath_RimR);
+        var tileBlack = AssetDatabase.LoadAssetAtPath<Tile>(TilePath_Black);
+        var tileTop1 = AssetDatabase.LoadAssetAtPath<Tile>(TilePath_Top1);
+        var tileTop2 = AssetDatabase.LoadAssetAtPath<Tile>(TilePath_Top2);
+        var tileRimL = AssetDatabase.LoadAssetAtPath<Tile>(TilePath_RimL);
+        var tileRimR = AssetDatabase.LoadAssetAtPath<Tile>(TilePath_RimR);
 
         if (tileBlack == null || tileTop1 == null || tileRimL == null || tileRimR == null)
         {
             Debug.LogError("Map3CaveAutoPolisher: Khong the load day du cac asset tile goc trong Assets/Sprites/TileMaps/Map3/!");
             return;
         }
+
+        // Dam bao tat ca cac tile di chuyen deu co collider dang Grid (1x1 o vuong) de khong bao gio bi roi xuyen san
+        tileBlack.colliderType = Tile.ColliderType.Grid;
+        tileTop1.colliderType  = Tile.ColliderType.Grid;
+        tileTop2.colliderType  = Tile.ColliderType.Grid;
+        tileRimL.colliderType  = Tile.ColliderType.Grid;
+        tileRimR.colliderType  = Tile.ColliderType.Grid;
+        EditorUtility.SetDirty(tileBlack);
+        EditorUtility.SetDirty(tileTop1);
+        EditorUtility.SetDirty(tileTop2);
+        EditorUtility.SetDirty(tileRimL);
+        EditorUtility.SetDirty(tileRimR);
 
         Undo.RegisterCompleteObjectUndo(ground, "Polish Movement Ground (Keep Slopes & Platforms)");
 
@@ -239,6 +251,62 @@ public static class Map3CaveAutoPolisher
         // 6. Ap dung vao Ground
         ground.SetTiles(posList.ToArray(), tileList.ToArray());
         ground.CompressBounds();
+
+        // 7. Bat collider, xoa includeLayers va tai tao vat ly collider ngay lap tuc
+        var tc = ground.GetComponent<TilemapCollider2D>();
+        if (tc != null)
+        {
+            tc.enabled = true;
+#if UNITY_2023_1_OR_NEWER
+            tc.compositeOperation = Collider2D.CompositeOperation.Merge;
+#else
+            tc.usedByComposite = true;
+#endif
+            tc.ProcessTilemapChanges();
+        }
+        var rb = ground.GetComponent<Rigidbody2D>();
+        if (rb != null)
+        {
+            rb.includeLayers = 0; // LayerMask 0 = tuong tac voi tat ca layer mac dinh (Player, Enemy, etc.)
+        }
+        var cc = ground.GetComponent<CompositeCollider2D>();
+        if (cc != null) cc.GenerateGeometry();
+
+        // 8. Dam bao co PlayerSpawn tai dung diem xuat phat cua Map 3 (X=3.5, Y=19.7 tren buc go san dau hang)
+        Vector3 startSpawnPos = new Vector3(3.5f, 19.7f, 0f);
+        var spawnGO = GameObject.Find("PlayerSpawn");
+        if (spawnGO == null)
+        {
+            spawnGO = new GameObject("PlayerSpawn");
+            spawnGO.transform.position = startSpawnPos;
+            spawnGO.AddComponent<PlayerSpawn>();
+            Undo.RegisterCreatedObjectUndo(spawnGO, "Create PlayerSpawn");
+            Debug.Log("Map3CaveAutoPolisher: Da tao moi PlayerSpawn tai " + startSpawnPos);
+        }
+        else
+        {
+            spawnGO.transform.position = startSpawnPos;
+        }
+
+        // 9. Dam bao Cinemachine Virtual Camera co CameraAssign de tu dong follow Musashi
+        var vcam = Object.FindAnyObjectByType<Cinemachine.CinemachineVirtualCamera>();
+        if (vcam != null)
+        {
+            if (vcam.GetComponent<CameraAssign>() == null)
+            {
+                vcam.gameObject.AddComponent<CameraAssign>();
+                Debug.Log("Map3CaveAutoPolisher: Da them CameraAssign vao CinemachineVirtualCamera.");
+            }
+            vcam.transform.position = new Vector3(startSpawnPos.x, startSpawnPos.y, -10f);
+        }
+
+        // 10. Di chuyen Musashi trong scene (neu co) ve thang vi tri spawn khoi dau tren mat san
+        var musashi = GameObject.Find("Musashi");
+        if (musashi != null)
+        {
+            musashi.transform.position = new Vector3(3.5f, 19.7f, 0f);
+            Debug.Log("Map3CaveAutoPolisher: Da dong bo vi tri Musashi ve (3.5, 19.7).");
+        }
 
         EditorSceneManager.MarkSceneDirty(ground.gameObject.scene);
 
