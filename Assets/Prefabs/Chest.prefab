@@ -32,7 +32,7 @@ Transform:
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 15
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &2178391874504080120
 SpriteRenderer:
@@ -75,7 +75,7 @@ SpriteRenderer:
   m_SortingLayerID: 519018043
   m_SortingLayer: 8
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 4cf7bcece8667f9488c4a14eca1a98c1, type: 3}
+  m_Sprite: {fileID: 21300000, guid: d2e788fc3209f2d41bdc784425d07485, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -174,12 +174,14 @@ MonoBehaviour:
   destroyAfterOpen: 0
   anim: {fileID: 0}
   spriteRenderer: {fileID: 2178391874504080120}
-  closedSprite: {fileID: 21300000, guid: 4cf7bcece8667f9488c4a14eca1a98c1, type: 3}
-  openedSprite: {fileID: 21300000, guid: 8f78fb62c9ecc3d4d83acd4b5e1d59d8, type: 3}
+  closedSprite: {fileID: 21300000, guid: d2e788fc3209f2d41bdc784425d07485, type: 3}
+  openedSprite: {fileID: 21300000, guid: dadfeea62e5e349488d82a979a299d45, type: 3}
   promptUI: {fileID: 0}
   openSound: {fileID: 0}
   notificationFont: {fileID: 0}
   notificationSize: 3
+  textSortingLayer: 
+  textSortingOrder: 1000
   floatHeight: 1.2
   floatDuration: 1.8
   notificationText: {fileID: 0}
