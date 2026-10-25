@@ -510,7 +510,8 @@ public static class Map3CaveMapBuilder
             ti.textureType = TextureImporterType.Sprite;
             dirty = true;
         }
-        if (ti.spriteImportMode == SpriteImportMode.Multiple && (ti.spritesheet == null || ti.spritesheet.Length == 0))
+        bool hasSprites = AssetDatabase.LoadAllAssetsAtPath(path).OfType<Sprite>().Any();
+        if (ti.spriteImportMode == SpriteImportMode.Multiple && !hasSprites)
         {
             ti.spriteImportMode = SpriteImportMode.Single;
             dirty = true;
