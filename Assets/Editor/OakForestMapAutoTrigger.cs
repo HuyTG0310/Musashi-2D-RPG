@@ -12,7 +12,7 @@ public static class OakForestMapAutoTrigger
 
     static void RunOnce()
     {
-        string key = "OakForestMap_Built_Fix_V5";
+        string key = "OakForestMap_Built_Fix_V6";
         if (SessionState.GetBool(key, false)) return;
         SessionState.SetBool(key, true);
 
@@ -26,7 +26,7 @@ public static class OakForestMapAutoTrigger
             }
         }
 
-        Debug.Log(">>> [OakForestMapAutoTrigger] Rebuilding Map 2 with stable background, leaf wind animation, canopy rustle, and animated shop...");
+        Debug.Log(">>> [OakForestMapAutoTrigger] Rebuilding Map 2 with Map 1 style unified tiled background without parts...");
         OakForestMapBuilder.Build();
         EditorSceneManager.SaveOpenScenes();
         Debug.Log(">>> [OakForestMapAutoTrigger] Map 2 successfully rebuilt and saved!");

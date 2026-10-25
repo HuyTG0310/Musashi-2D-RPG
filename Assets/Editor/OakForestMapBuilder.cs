@@ -334,6 +334,19 @@ public static class OakForestMapBuilder
             ti.spriteImportMode = SpriteImportMode.Single;
             dirty = true;
         }
+        if (path.Contains("Background"))
+        {
+            if (ti.wrapMode != TextureWrapMode.Repeat)
+            {
+                ti.wrapMode = TextureWrapMode.Repeat;
+                dirty = true;
+            }
+            if (ti.spriteMeshType != SpriteMeshType.FullRect)
+            {
+                ti.spriteMeshType = SpriteMeshType.FullRect;
+                dirty = true;
+            }
+        }
         if (dirty)
         {
             ti.SaveAndReimport();
@@ -410,86 +423,51 @@ public static class OakForestMapBuilder
     {
         var bgRoot = new GameObject("Background").transform;
         bgRoot.SetParent(root);
-        for (int i = 1; i <= 3; i++)
+        bgRoot.localPosition = Vector3.zero;
+
+        // Chiều cao map là H (50) và camera confiner lên tới H + 6 (56)
+        // Sprite background gốc 320x180 px ở 16 PPU có chiều cao 11.25 units
+        // Để phủ trọn vẹn từ Y=0 đến Y=56: scale = 5.2f (11.25 * 5.2 = 58.5 units)
+        // Tọa độ Y đặt tại 58.5f / 2f = 29.25f để đáy sprite vừa vặn chạm mốc Y=0
+        float scale = 5.2f;
+        float targetY = (11.25f * scale) / 2f; // 29.25f
+        float tiledWidth = 500f; // Trải dài 500 units theo chiều ngang (drawMode = Tiled)
+
+        Camera mainCam = Camera.main;
+        if (mainCam == null) mainCam = Object.FindFirstObjectByType<Camera>();
+        GameObject camGo = mainCam != null ? mainCam.gameObject : null;
+
+        // Cấu hình giống hệt Map 1: 3 layer BG1, BG2, BG3
+        // Mỗi layer là 1 GameObject duy nhất (không chia ra từng part con), trải dài toàn map với DrawMode = Tiled
+        // Gắn BackgroundController để parallax mượt mà theo camera
+        var layers = new[]
         {
-            var sprite = LoadFirstSprite(BgDir + $"background_layer_{i}.png");
+            new { name = "BG1", spriteFile = "background_layer_1.png", order = 0, parallax = 1.0f },
+            new { name = "BG2", spriteFile = "background_layer_2.png", order = 1, parallax = 0.6f },
+            new { name = "BG3", spriteFile = "background_layer_3.png", order = 2, parallax = 0.3f }
+        };
+
+        foreach (var l in layers)
+        {
+            var sprite = LoadFirstSprite(BgDir + l.spriteFile);
             if (sprite == null) continue;
-            var layer = new GameObject("BG" + i).transform;
-            layer.SetParent(bgRoot);
-            float scale = H / sprite.bounds.size.y;
-            float width = sprite.bounds.size.x * scale;
-            for (float x = 0; x < W + width; x += width)
-            {
-                var go = new GameObject("part");
-                go.transform.SetParent(layer);
-                var sr = go.AddComponent<SpriteRenderer>();
-                sr.sprite = sprite;
-                sr.sortingLayerName = "Background";
-                sr.sortingOrder = i - 1;
-                go.transform.localScale = Vector3.one * scale;
-                go.transform.position = new Vector3(
-                    x + width / 2f - sprite.bounds.center.x * scale,
-                    H / 2f - sprite.bounds.center.y * scale, 0);
-            }
 
-            // Background cố định, không đung đưa rung lắc cả thế giới; giữ parallax tự nhiên theo camera
-            var sway = layer.gameObject.AddComponent<BackgroundWindSway>();
-            sway.enableWindSway = false;
-            sway.swayAmountX = 0f;
-            sway.swayAmountY = 0f;
-            sway.swayRotationAngle = 0f;
+            var go = new GameObject(l.name);
+            go.transform.SetParent(bgRoot);
+            go.transform.position = new Vector3(0f, targetY, 0f);
+            go.transform.localScale = new Vector3(scale, scale, 1f);
 
-            if (i == 1)
-            {
-                // BG1: Bầu trời & mây trôi nhẹ
-                sway.parallaxFactor = 0.05f;
-                sway.constantDriftSpeed = 0.035f;
-            }
-            else if (i == 2)
-            {
-                // BG2: Rặng cây xa
-                sway.parallaxFactor = 0.20f;
-            }
-            else if (i == 3)
-            {
-                // BG3: Hàng cây sồi gần
-                sway.parallaxFactor = 0.45f;
-            }
-        }
+            var sr = go.AddComponent<SpriteRenderer>();
+            sr.sprite = sprite;
+            sr.drawMode = SpriteDrawMode.Tiled;
+            sr.tileMode = SpriteTileMode.Continuous;
+            sr.size = new Vector2(tiledWidth, sprite.rect.height / sprite.pixelsPerUnit);
+            sr.sortingLayerName = "Background";
+            sr.sortingOrder = l.order;
 
-        // 1. Hệ thống lá sồi bay/rơi theo gió (Leaf Wind Effect)
-        var leafGo = new GameObject("LeafWindEffect");
-        leafGo.transform.SetParent(bgRoot);
-        var leafEffect = leafGo.AddComponent<OakLeafWindEffect>();
-        leafEffect.leafCount = 45;
-        leafEffect.spawnAreaWidth = 42f;
-        leafEffect.spawnAreaHeight = 26f;
-        leafEffect.windSpeedX = 2.4f;
-        leafEffect.fallSpeedY = 1.1f;
-        leafEffect.flutterSpeed = 7.0f;
-
-        // 2. Các chùm lá sồi rủ trên tán cây (Canopy Leaves Rustle)
-        var canopyClusterSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/VFX/canopy_leaf_cluster.png");
-        if (canopyClusterSprite != null)
-        {
-            var canopyRoot = new GameObject("CanopyLeaves").transform;
-            canopyRoot.SetParent(bgRoot);
-            for (float cx = 4f; cx < W; cx += 10f)
-            {
-                var cGo = new GameObject($"canopy_rustle_{Mathf.RoundToInt(cx)}");
-                cGo.transform.SetParent(canopyRoot);
-                var cSr = cGo.AddComponent<SpriteRenderer>();
-                cSr.sprite = canopyClusterSprite;
-                cSr.sortingLayerName = "Background";
-                cSr.sortingOrder = 3;
-                cGo.transform.localScale = Vector3.one * 1.5f;
-                float cy = H - 8f + Mathf.Sin(cx * 0.3f) * 1.5f;
-                cGo.transform.position = new Vector3(cx, cy, 0f);
-                var rustle = cGo.AddComponent<CanopyLeafRustle>();
-                rustle.rustleSpeed = 1.8f;
-                rustle.maxTiltAngle = 4.0f;
-                rustle.waveOffset = cx * 0.2f;
-            }
+            var controller = go.AddComponent<BackgroundController>();
+            controller.cam = camGo;
+            controller.parallaxEffect = l.parallax;
         }
     }
 

@@ -93,6 +93,19 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: Server
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
@@ -105,14 +118,14 @@ TextureImporter:
         width: 32
         height: 24
       alignment: 0
-      pivot: {x: 0.5, y: 1.0}
+      pivot: {x: 0.5, y: 1}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
       spriteID: bb19689f5a154b2284f7095a0d3092d2
-      internalID: 2000
+      internalID: -7644925029123639831
       vertices: []
       indices: 
       edges: []
@@ -126,14 +139,14 @@ TextureImporter:
         width: 32
         height: 24
       alignment: 0
-      pivot: {x: 0.5, y: 1.0}
+      pivot: {x: 0.5, y: 1}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
       spriteID: b256727fab784545b1413a664502e796
-      internalID: 2001
+      internalID: 1326897202935407086
       vertices: []
       indices: 
       edges: []
@@ -147,14 +160,14 @@ TextureImporter:
         width: 32
         height: 24
       alignment: 0
-      pivot: {x: 0.5, y: 1.0}
+      pivot: {x: 0.5, y: 1}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
       spriteID: 9d2b60e9d6ac4d4f956cb5fe3a9692b6
-      internalID: 2002
+      internalID: 804995601955745736
       vertices: []
       indices: 
       edges: []
@@ -168,21 +181,35 @@ TextureImporter:
         width: 32
         height: 24
       alignment: 0
-      pivot: {x: 0.5, y: 1.0}
+      pivot: {x: 0.5, y: 1}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
       spriteID: aff9d8b6e70a461192723655e3ad3a6e
-      internalID: 2003
+      internalID: -3814980015184087209
       vertices: []
       indices: 
       edges: []
       weights: []
-  spritePackingTag: 
+    outline: []
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    nameFileIdTable:
+      canopy_cluster_0: -7644925029123639831
+      canopy_cluster_1: 1326897202935407086
+      canopy_cluster_2: 804995601955745736
+      canopy_cluster_3: -3814980015184087209
+  mipmapLimitGroupName: 
   pSDRemoveMatte: 0
-  pSDShowRemoveMatteOption: 0
   userData: 
   assetBundleName: 
   assetBundleVariant: 
