@@ -92,6 +92,8 @@ public class ShopController : MonoBehaviour
         {
             playerScript.coins -= price;
             playerScript.appleCount++;
+            Musashi.Core.GameSessionTracker.CoinsSpent += price;
+            Musashi.Core.GameSessionTracker.ApplesObtained++;
 
             if (buySuccessSound != null)
             {
@@ -118,6 +120,8 @@ public class ShopController : MonoBehaviour
         {
             playerScript.coins -= price;
             playerScript.shurikenCount += 5;
+            Musashi.Core.GameSessionTracker.CoinsSpent += price;
+            Musashi.Core.GameSessionTracker.ShurikensObtained += 5;
 
             if (buySuccessSound != null)
             {
@@ -144,6 +148,8 @@ public class ShopController : MonoBehaviour
         {
             playerScript.coins -= price;
             playerScript.sakeCount += 1;
+            Musashi.Core.GameSessionTracker.CoinsSpent += price;
+            Musashi.Core.GameSessionTracker.SakeObtained += 1;
 
             if (buySuccessSound != null)
             {
@@ -194,6 +200,7 @@ public class ShopController : MonoBehaviour
         {
             playerScript.coins -= upgradeCost;
             playerScript.attackDamage += attackBonus;
+            Musashi.Core.GameSessionTracker.CoinsSpent += upgradeCost;
 
             if (buySuccessSound != null)
             {
@@ -221,6 +228,7 @@ public class ShopController : MonoBehaviour
         {
             playerScript.coins -= upgradeCost;
             playerScript.defensePower += defenseBonus;
+            Musashi.Core.GameSessionTracker.CoinsSpent += upgradeCost;
 
             if (buySuccessSound != null) audioSource.PlayOneShot(buySuccessSound);
             StartCoroutine(ShowNotification($"-{upgradeCost} Coins: Improve armor (DEF +{defenseBonus})!", Color.green));
