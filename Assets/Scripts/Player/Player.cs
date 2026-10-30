@@ -137,6 +137,7 @@ public class Player : MonoBehaviour
         currentHealth = maxHealth;
         audioManager = FindAnyObjectByType<AudioManager>();
         UpdateHealthUI();
+        Musashi.Core.GameSessionTracker.RegisterInitialInventory(coins, appleCount, shurikenCount, sakeCount);
     }
 
 
@@ -370,6 +371,11 @@ public class Player : MonoBehaviour
         }
         rb.simulated = false;
         this.enabled = false;
+
+        if (Musashi.UI.GameEndManager.Instance != null)
+        {
+            Musashi.UI.GameEndManager.Instance.TriggerDefeat();
+        }
     }
 
 
@@ -428,6 +434,7 @@ public class Player : MonoBehaviour
         {
             currentStamina -= 4;
             shurikenCount--;
+            Musashi.Core.GameSessionTracker.ShurikensUsed++;
             anim.SetTrigger("throw");
         }
     }
@@ -439,6 +446,7 @@ public class Player : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Alpha1) && appleCount > 0 && currentHealth < maxHealth)
         {
             appleCount--;
+            Musashi.Core.GameSessionTracker.ApplesUsed++;
             currentHealth += 50;
 
             if (currentHealth > maxHealth)
@@ -588,6 +596,7 @@ public class Player : MonoBehaviour
     public void AddCoin(int amount)
     {
         coins += amount;
+        Musashi.Core.GameSessionTracker.CoinsObtained += amount;
         Debug.Log("Đã nhặt xu! Tổng tiền hiện tại: " + coins);
         // Sau này bạn có thể thêm code update UI Text số tiền ở đây
     }
@@ -607,7 +616,8 @@ public class Player : MonoBehaviour
         {
             if (sakeCount > 0 && currentStamina < maxStamina)
             {
-                sakeCount--; // Trá»« 1 bÃ¬nh trong tÃºi
+                sakeCount--;
+                Musashi.Core.GameSessionTracker.SakeUsed++;
 
                 if (anim != null)
                 {
