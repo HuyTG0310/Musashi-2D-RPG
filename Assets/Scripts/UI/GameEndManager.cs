@@ -255,9 +255,9 @@ namespace Musashi.UI
 #if UNITY_EDITOR
             if (fontAsset == null)
             {
-                fontAsset = UnityEditor.AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/Sprites/UI_Elements/PixelOperator8 SDF.asset");
+                fontAsset = UnityEditor.AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/Resources/Fonts/PixelOperator8 SDF.asset");
                 if (fontAsset == null)
-                    fontAsset = UnityEditor.AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/Resources/Fonts/PixelOperator8 SDF.asset");
+                    fontAsset = UnityEditor.AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/Sprites/UI_Elements/PixelOperator8 SDF.asset");
             }
             if (menuBgSprite == null)
             {

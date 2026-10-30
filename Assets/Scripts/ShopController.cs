@@ -4,14 +4,11 @@ using UnityEngine;
 
 public class ShopController : MonoBehaviour
 {
-
-
-
     [Header("Shop UI")]
     public GameObject shopUI;
+    public GameObject promptUI; // Kéo object chữ "Press E" vào đây
     private bool isPlayerinRange = false;
     private Player playerScript;
-
 
     [Header("ShopAudio")]
     public AudioSource audioSource;
@@ -21,11 +18,14 @@ public class ShopController : MonoBehaviour
     [Header("UI Notifications")]
     public TextMeshProUGUI notificationText; // Kéo object NotificationText vào đây
 
-
     // Start is called before the first frame update
     void Start()
     {
-
+        // Tắt chữ Press E khi mới load game
+        if (promptUI != null)
+        {
+            promptUI.SetActive(false);
+        }
     }
 
     // Update is called once per frame
@@ -36,7 +36,6 @@ public class ShopController : MonoBehaviour
         {
             ToggleShop();
         }
-
     }
 
     public void ToggleShop()
@@ -45,11 +44,13 @@ public class ShopController : MonoBehaviour
         shopUI.SetActive(!shopUI.activeSelf);
         // dừng thời giang game khi mở shop
         Time.timeScale = shopUI.activeSelf ? 0f : 1f;
+
+        // Ẩn chữ Press E khi đang mở bảng Shop, và hiện lại khi đóng Shop
+        if (promptUI != null)
+        {
+            promptUI.SetActive(!shopUI.activeSelf);
+        }
     }
-
-
-
-
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
@@ -57,6 +58,13 @@ public class ShopController : MonoBehaviour
         {
             isPlayerinRange = true;
             playerScript = collision.GetComponent<Player>();
+
+            // Hiện chữ Press E khi Musashi bước vào vùng an toàn của Shop
+            if (promptUI != null)
+            {
+                promptUI.SetActive(true);
+            }
+
             Debug.Log("IN range");
         }
     }
@@ -68,9 +76,14 @@ public class ShopController : MonoBehaviour
             isPlayerinRange = false;
             playerScript = null;
             shopUI.SetActive(false);    //tự động đóng shop nếu Musashi đi xa
+
+            // Tắt luôn chữ Press E khi Musashi đi xa
+            if (promptUI != null)
+            {
+                promptUI.SetActive(false);
+            }
         }
     }
-
 
     public void BuyApple()
     {
@@ -100,7 +113,6 @@ public class ShopController : MonoBehaviour
         }
     }
 
-
     public void BuyShurikens()
     {
         int price = 30;
@@ -128,7 +140,6 @@ public class ShopController : MonoBehaviour
             StartCoroutine(ShowNotification("Coins are not enough!", Color.red));
         }
     }
-
 
     public void BuySake()
     {
@@ -158,13 +169,11 @@ public class ShopController : MonoBehaviour
         }
     }
 
-
     public void CloseShop()
     {
         shopUI.SetActive(false);
         Time.timeScale = 1f;
     }
-
 
     private IEnumerator ShowNotification(string message, Color textColor)
     {
@@ -172,7 +181,6 @@ public class ShopController : MonoBehaviour
         {
             yield break;
         }
-
 
         notificationText.text = message;
         notificationText.color = textColor;
@@ -182,9 +190,6 @@ public class ShopController : MonoBehaviour
 
         notificationText.gameObject.SetActive(false);
     }
-
-
-
 
     public void UpgradeAttack()
     {
@@ -196,7 +201,6 @@ public class ShopController : MonoBehaviour
             playerScript.coins -= upgradeCost;
             playerScript.attackDamage += attackBonus;
             Musashi.Core.GameSessionTracker.CoinsSpent += upgradeCost;
-
 
             if (buySuccessSound != null)
             {
@@ -235,7 +239,4 @@ public class ShopController : MonoBehaviour
             StartCoroutine(ShowNotification("Coins not enough!", Color.red));
         }
     }
-
-
-
 }
