@@ -31,6 +31,10 @@ namespace Assets.Scripts.Enemies.Map3
         [Header("yellowNinja Sounds")]
         public AudioClip attackSound;
 
+        // chống giật khi patrol (gộp các điều kiện Flip thành 1 quyết định/frame + cooldown)
+        private float lastPatrolFlipTime = -999f;
+        private const float patrolFlipCooldown = 0.3f;
+
 
         // =========================================================
         // START
@@ -60,7 +64,10 @@ namespace Assets.Scripts.Enemies.Map3
         {
             // Nếu yellowNinja chết hoặc không tìm thấy Player
             // thì không làm gì
-            
+            //if (isDead || currentHealth <= 0 || player == null)
+            //{
+            //    return;
+            //}
 
 
             // phát hiện vừa bị đánh trúng (máu giảm) trong lúc đang isAttacking ->
@@ -147,9 +154,10 @@ namespace Assets.Scripts.Enemies.Map3
             // Đảo hướng
             facingRight = !facingRight;
 
-            // Lật Sprite
-            transform.localScale =
-                new Vector3(-transform.localScale.x, 1, 1);
+            // Lật Sprite - giữ nguyên Y và Z hiện tại, chỉ đảo dấu trục X,
+            // tránh ghi đè Scale Y/Z đã chỉnh tay trong Inspector về lại giá trị mặc định 1
+            Vector3 currentScale = transform.localScale;
+            transform.localScale = new Vector3(-currentScale.x, currentScale.y, currentScale.z);
         }
 
 
@@ -170,47 +178,27 @@ namespace Assets.Scripts.Enemies.Map3
                 new Vector2(direction * moveSpeed, rb.velocity.y);
 
 
-            // =====================================================
-            // KIỂM TRA GIỚI HẠN PATROL BÊN PHẢI
-            // =====================================================
-
-            if (transform.position.x >=
-                startPosition.x + patrolDistance &&
-                facingRight)
-            {
-                Flip();
-            }
-
-
-            // =====================================================
-            // KIỂM TRA GIỚI HẠN PATROL BÊN TRÁI
-            // =====================================================
-
-            else if (transform.position.x <=
-                     startPosition.x - patrolDistance &&
-                     !facingRight)
-            {
-                Flip();
-            }
-
-
-            // =====================================================
-            // KIỂM TRA MẶT ĐẤT
-            // =====================================================
+            // gộp CẢ 3 điều kiện vào 1 quyết định Flip DUY NHẤT mỗi frame,
+            // tránh trường hợp Flip() bị gọi nhiều lần liên tiếp trong cùng frame gây giật
+            bool reachedPatrolLimit =
+                (transform.position.x >= startPosition.x + patrolDistance && facingRight) ||
+                (transform.position.x <= startPosition.x - patrolDistance && !facingRight);
 
             bool isGrounded =
-                Physics2D.OverlapCircle(
-                    groundCheck.position,
-                    0.2f,
-                    groundLayer
-                );
+                Physics2D.OverlapCircle(groundCheck.position, 0.25f, groundLayer);
 
+            // dò tường chắn ngang - groundCheck chỉ bắt được hố/vực,
+            // không bắt được tường thẳng đứng trong khi vẫn còn đất dưới chân
+            bool hitWall =
+                wallCheck != null && Physics2D.OverlapCircle(wallCheck.position, 0.2f, groundLayer);
 
-            // Nếu không còn đứng trên mặt đất
-            // thì quay đầu
-            if (!isGrounded)
+            // thêm cooldown chống giật: dù điều kiện Flip có liên tục đúng/sai sát ranh giới,
+            // cũng không cho phép Flip quá nhanh liên tiếp
+            if ((reachedPatrolLimit || !isGrounded || hitWall) &&
+                Time.time >= lastPatrolFlipTime + patrolFlipCooldown)
             {
                 Flip();
+                lastPatrolFlipTime = Time.time;
             }
         }
 

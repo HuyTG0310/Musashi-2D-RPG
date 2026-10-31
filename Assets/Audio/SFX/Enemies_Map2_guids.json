@@ -1,0 +1,18 @@
+{
+  "Goblin/goblin_attack.ogg": "068254edcbd0495ba874380daa1c3c4c",
+  "Goblin/goblin_death.wav": "1fc3e63e1a8f4014bee4975fc3580c16",
+  "Goblin/goblin_hurt.wav": "65a72cc42b4d43569f92eda63764c006",
+  "Huntress2/huntress_attack.ogg": "20ae595ffdc94fdc86420683f0c6897f",
+  "Huntress2/huntress_death.wav": "12c3ebe275034661b3af2abbb6b6774b",
+  "Huntress2/huntress_hurt.wav": "156cba732aa1414d8c863bfa9d3ba2ca",
+  "MartialHero3/martial_attack.ogg": "f0ae4d6508cf4936bbe8106e19c1ebc8",
+  "MartialHero3/martial_death.wav": "a7740b0578334377abdc6d51361010af",
+  "MartialHero3/martial_hurt.wav": "cbddb5535c604a6cae88ce7f9a57c246",
+  "Mimic/mimic_attack.ogg": "329472e25a604745a8ecc75774b7be04",
+  "Mimic/mimic_death.ogg": "c0f13fb1f8af48a3928a77eea4dbc62e",
+  "Mimic/mimic_hurt.ogg": "590a48d0115e4286b8c4929c12cc180d",
+  "Mimic/mimic_wake.ogg": "9a8e71ac6715476da10ebbce00a7aa32",
+  "Skeleton/skeleton_attack.ogg": "d1db982cbab149cab34e00e90178b970",
+  "Skeleton/skeleton_death.ogg": "3129ac1e0ae04f469350cdfde5539c2b",
+  "Skeleton/skeleton_hurt.ogg": "71be5e74d6af43fbbc641ff064f4e584"
+}

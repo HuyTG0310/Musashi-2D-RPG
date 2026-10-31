@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 namespace Assets.Scripts.Enemies.Map2
@@ -5,15 +6,16 @@ namespace Assets.Scripts.Enemies.Map2
     public class Huntress2 : EnemyBase
     {
         [Header("Huntress AI & Combat")]
-        public float chaseRange = 8f;       // Tầm nhìn phát hiện Musashi
-        public float attackRange = 2.5f;    // Tầm đánh cận chiến (tăng lên 2.5f để nhận diện đòn đánh dễ dàng)
+        public float chaseRange = 12f;      // Tầm nhìn phát hiện Musashi
+        public float attackRange = 7.0f;    // Tầm bắn cung từ xa
         public float attackCooldown = 1.6f; // Thời gian hồi chiêu
         public float attackDamage = 28f;    // Sát thương đòn đánh
         private float lastAttackTime;
+        private bool hasDealtDamageThisAttack = false;
 
         [Header("Huntress Movement")]
         public bool facingRight = true;
-        public float patrolDistance = 4f;   // Phạm vi đi tuần (đặt 0 nếu muốn đi đụng tường mới quay đầu)
+        public float patrolDistance = 4f;   // Phạm vi đi tuần
         private float startX;
         public Transform groundCheck;
         public Transform wallCheck;
@@ -23,7 +25,7 @@ namespace Assets.Scripts.Enemies.Map2
 
         [Header("Huntress Attack")]
         public Transform attackPoint;
-        public float attackRadius = 1.2f;   // Bán kính đòn chém (tăng lên 1.2f)
+        public float attackRadius = 1.5f;
         public LayerMask playerLayer;
         public GameObject arrowPrefab;     // Prefab Mũi Tên (Arrow)
 
@@ -35,26 +37,43 @@ namespace Assets.Scripts.Enemies.Map2
             base.Start();
             facingRight = true;
             startX = transform.position.x;
-            moveSpeed = 2.8f + Random.Range(-0.2f, 0.4f);
+            moveSpeed = 2.8f + Random.Range(-0.2f, 0.3f);
             maxHealth = 140f;
             currentHealth = maxHealth;
             defense = 60f;
+            attackRange = Mathf.Max(attackRange, 6.0f);
+
+            if (groundLayer.value == 0)
+            {
+                groundLayer = LayerMask.GetMask("Ground");
+            }
+            if (playerLayer.value == 0)
+            {
+                playerLayer = LayerMask.GetMask("Player");
+            }
         }
 
         void Update()
         {
-            if (currentHealth <= 0 || player == null || playerScript == null) return;
+            if (currentHealth <= 0) return;
+            if (!EnsurePlayerReference()) return;
 
+            float xDiff = player.position.x - transform.position.x;
+            float absXDiff = Mathf.Abs(xDiff);
+            float yDiff = Mathf.Abs(player.position.y - transform.position.y);
             float distanceToPlayer = Vector2.Distance(transform.position, player.position);
 
-            if (distanceToPlayer <= attackRange && playerScript.currentHealth > 0)
+            // 1. Tấn công nếu trong tầm bắn và chênh lệch độ cao vừa phải
+            if (absXDiff <= attackRange && yDiff <= 3.5f && playerScript.currentHealth > 0)
             {
                 AttackPlayer();
             }
-            else if (distanceToPlayer <= chaseRange && playerScript.currentHealth > 0)
+            // 2. Đuổi theo nếu trong tầm nhìn
+            else if (distanceToPlayer <= chaseRange && yDiff <= 5.0f && playerScript.currentHealth > 0)
             {
                 ChasePlayer();
             }
+            // 3. Đi tuần
             else
             {
                 Patrol();
@@ -77,7 +96,7 @@ namespace Assets.Scripts.Enemies.Map2
             float direction = facingRight ? 1f : -1f;
             if (rb != null) rb.velocity = new Vector2(direction * moveSpeed, rb.velocity.y);
 
-            // 1. Tự động quay đầu nếu đi quá phạm vi tuần tra (chỉ áp dụng nếu patrolDistance > 0)
+            // 1. Tự động quay đầu nếu đi quá phạm vi tuần tra
             if (patrolDistance > 0)
             {
                 if (facingRight && transform.position.x >= startX + patrolDistance)
@@ -92,7 +111,7 @@ namespace Assets.Scripts.Enemies.Map2
                 }
             }
 
-            // 2. Kiểm tra vực thẳm hoặc va chạm tường (nếu có gán groundLayer)
+            // 2. Kiểm tra vực thẳm hoặc va chạm tường
             if (groundLayer.value == 0) return;
 
             bool isGrounded = true;
@@ -104,7 +123,7 @@ namespace Assets.Scripts.Enemies.Map2
             bool isWallHit = false;
             if (wallCheck != null)
             {
-                isWallHit = Physics2D.OverlapCircle(wallCheck.position, 0.15f, groundLayer);
+                isWallHit = Physics2D.OverlapCircle(wallCheck.position, 0.2f, groundLayer);
             }
 
             if ((groundCheck != null && !isGrounded) || isWallHit)
@@ -119,12 +138,11 @@ namespace Assets.Scripts.Enemies.Map2
 
             float xDiff = player.position.x - transform.position.x;
 
-            // Chỉ quay đầu khi khoảng cách X đủ lớn (> 0.3f) để tránh bị giật xoay tại chỗ
-            if (xDiff > 0.3f && !facingRight)
+            if (xDiff > 0.2f && !facingRight)
             {
                 Flip();
             }
-            else if (xDiff < -0.3f && facingRight)
+            else if (xDiff < -0.2f && facingRight)
             {
                 Flip();
             }
@@ -135,51 +153,68 @@ namespace Assets.Scripts.Enemies.Map2
 
         private void AttackPlayer()
         {
-            if (rb != null) rb.velocity = Vector2.zero;
+            if (rb != null) rb.velocity = new Vector2(0, rb.velocity.y);
             if (anim != null) anim.SetBool("isRunning", false);
+
+            float xDiff = player.position.x - transform.position.x;
+            if (xDiff > 0.1f && !facingRight)
+            {
+                Flip();
+            }
+            else if (xDiff < -0.1f && facingRight)
+            {
+                Flip();
+            }
 
             if (Time.time >= lastAttackTime + attackCooldown)
             {
+                hasDealtDamageThisAttack = false;
                 if (anim != null) anim.SetTrigger("attack");
+                TriggerAtkSound();
                 lastAttackTime = Time.time;
+                StartCoroutine(DamageRoutine(0.45f));
             }
         }
 
-        // Được gọi trong Animation Event của Animation Attack của Huntress
+        private IEnumerator DamageRoutine(float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            DealDamageToPlayer();
+        }
+
+        // Được gọi trong Animation Event của Huntress hoặc từ DamageRoutine
         public void DealDamageToPlayer()
         {
+            if (hasDealtDamageThisAttack) return;
+            hasDealtDamageThisAttack = true;
+
             if (arrowPrefab != null)
             {
                 SpawnArrow();
                 return;
             }
 
-            if (attackPoint == null)
-            {
-                Debug.LogWarning("Huntress: AttackPoint is missing on Inspector!");
-                return;
-            }
+            if (attackPoint == null) return;
 
-            Collider2D hitPlayer = Physics2D.OverlapCircle(attackPoint.position, attackRadius, playerLayer);
-
-            if (hitPlayer != null)
+            Collider2D[] hits = Physics2D.OverlapCircleAll(attackPoint.position, attackRadius > 0.2f ? attackRadius : 1.5f, playerLayer);
+            foreach (var col in hits)
             {
-                Player p = hitPlayer.GetComponent<Player>();
-                if (p != null)
+                Player p = col.GetComponentInParent<Player>();
+                if (p != null && p.currentHealth > 0)
                 {
                     p.TakeDamage(attackDamage);
-                    Debug.Log("Huntress hit Musashi for " + attackDamage + " damage!");
+                    break;
                 }
             }
         }
 
         public void SpawnArrow()
         {
-            if (attackPoint == null) return;
+            Vector3 spawnPos = (attackPoint != null) ? attackPoint.position : transform.position;
 
             if (arrowPrefab != null)
             {
-                GameObject arrowObj = Instantiate(arrowPrefab, attackPoint.position, Quaternion.identity);
+                GameObject arrowObj = Instantiate(arrowPrefab, spawnPos, Quaternion.identity);
                 Arrow arrowScript = arrowObj.GetComponent<Arrow>();
                 if (arrowScript != null)
                 {

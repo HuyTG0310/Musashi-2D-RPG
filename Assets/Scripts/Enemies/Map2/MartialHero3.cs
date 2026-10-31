@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 namespace Assets.Scripts.Enemies.Map2
@@ -6,23 +7,24 @@ namespace Assets.Scripts.Enemies.Map2
     {
         [Header("MartialHero3 AI & Combat")]
         public float chaseRange = 7.5f;      // Tầm nhìn phát hiện Musashi
-        public float attackRange = 1.8f;     // Tầm đánh cận chiến
+        public float attackRange = 2.2f;     // Tầm đánh cận chiến
         public float attackCooldown = 1.8f;  // Thời gian hồi chiêu giữa các đòn đánh
         private float lastAttackTime;
+        private bool hasDealtDamageThisAttack = false;
 
         [Header("MartialHero3 Attack 1 - Đòn nhẹ")]
         public float attack1Damage = 20f;
-        public float attack1Radius = 0.8f;
+        public float attack1Radius = 1.5f;
         public Transform attackPoint1;
 
         [Header("MartialHero3 Attack 2 - Đòn vừa")]
         public float attack2Damage = 30f;
-        public float attack2Radius = 1.0f;
+        public float attack2Radius = 1.6f;
         public Transform attackPoint2;
 
         [Header("MartialHero3 Attack 3 - Đòn mạnh")]
         public float attack3Damage = 40f;
-        public float attack3Radius = 1.2f;
+        public float attack3Radius = 1.8f;
         public Transform attackPoint3;
 
         public LayerMask playerLayer;
@@ -51,22 +53,39 @@ namespace Assets.Scripts.Enemies.Map2
             maxHealth = 160f;
             currentHealth = maxHealth;
             defense = 50f;
+            attackRange = Mathf.Max(attackRange, 2.2f);
+
+            if (groundLayer.value == 0)
+            {
+                groundLayer = LayerMask.GetMask("Ground");
+            }
+            if (playerLayer.value == 0)
+            {
+                playerLayer = LayerMask.GetMask("Player");
+            }
         }
 
         void Update()
         {
-            if (currentHealth <= 0 || player == null || playerScript == null) return;
+            if (currentHealth <= 0) return;
+            if (!EnsurePlayerReference()) return;
 
+            float xDiff = player.position.x - transform.position.x;
+            float absXDiff = Mathf.Abs(xDiff);
+            float yDiff = Mathf.Abs(player.position.y - transform.position.y);
             float distanceToPlayer = Vector2.Distance(transform.position, player.position);
 
-            if (distanceToPlayer <= attackRange && playerScript.currentHealth > 0)
+            // 1. Tấn công nếu trong tầm đánh ngang và cùng sàn
+            if (absXDiff <= attackRange && yDiff <= 2.2f && playerScript.currentHealth > 0)
             {
                 AttackPlayer();
             }
-            else if (distanceToPlayer <= chaseRange && playerScript.currentHealth > 0)
+            // 2. Đuổi theo nếu trong tầm nhìn
+            else if (distanceToPlayer <= chaseRange && yDiff <= 4.5f && playerScript.currentHealth > 0)
             {
                 ChasePlayer();
             }
+            // 3. Tuần tra bình thường
             else
             {
                 Patrol();
@@ -114,7 +133,7 @@ namespace Assets.Scripts.Enemies.Map2
             bool isWallHit = false;
             if (wallCheck != null)
             {
-                isWallHit = Physics2D.OverlapCircle(wallCheck.position, 0.15f, groundLayer);
+                isWallHit = Physics2D.OverlapCircle(wallCheck.position, 0.2f, groundLayer);
             }
 
             if ((groundCheck != null && !isGrounded) || isWallHit)
@@ -129,11 +148,11 @@ namespace Assets.Scripts.Enemies.Map2
 
             float xDiff = player.position.x - transform.position.x;
 
-            if (xDiff > 0.3f && !facingRight)
+            if (xDiff > 0.2f && !facingRight)
             {
                 Flip();
             }
-            else if (xDiff < -0.3f && facingRight)
+            else if (xDiff < -0.2f && facingRight)
             {
                 Flip();
             }
@@ -144,69 +163,103 @@ namespace Assets.Scripts.Enemies.Map2
 
         private void AttackPlayer()
         {
-            if (rb != null) rb.velocity = Vector2.zero;
+            if (rb != null) rb.velocity = new Vector2(0, rb.velocity.y);
             if (anim != null) anim.SetBool("isRunning", false);
+
+            float xDiff = player.position.x - transform.position.x;
+            if (xDiff > 0.1f && !facingRight)
+            {
+                Flip();
+            }
+            else if (xDiff < -0.1f && facingRight)
+            {
+                Flip();
+            }
 
             if (Time.time >= lastAttackTime + attackCooldown)
             {
-                // Ngẫu nhiên chọn 1 trong 3 đòn đánh: attack1, attack2, attack3
+                hasDealtDamageThisAttack = false;
                 int attackCombo = Random.Range(1, 4);
                 if (anim != null)
                 {
                     anim.SetTrigger("attack" + attackCombo);
                 }
+                TriggerAttackSound(attackCombo);
                 lastAttackTime = Time.time;
+                StartCoroutine(DamageRoutine(0.35f, attackCombo));
             }
         }
 
-        // Được gọi trong Animation Event của Attack1
+        private IEnumerator DamageRoutine(float delay, int combo)
+        {
+            yield return new WaitForSeconds(delay);
+            if (combo == 1) DealDamageAttack1();
+            else if (combo == 2) DealDamageAttack2();
+            else DealDamageAttack3();
+        }
+
+        private void TriggerAttackSound(int combo)
+        {
+            if (combo == 1) TriggerAttack1Sound();
+            else if (combo == 2) TriggerAttack2Sound();
+            else TriggerAttack3Sound();
+        }
+
+        // Được gọi trong Animation Event của Attack1 hoặc từ DamageRoutine
         public void DealDamageAttack1()
         {
-            if (attackPoint1 == null) return;
-            Collider2D hitPlayer = Physics2D.OverlapCircle(attackPoint1.position, attack1Radius, playerLayer);
+            if (hasDealtDamageThisAttack) return;
+            hasDealtDamageThisAttack = true;
 
-            if (hitPlayer != null)
-            {
-                Player p = hitPlayer.GetComponent<Player>();
-                if (p != null)
-                {
-                    p.TakeDamage(attack1Damage);
-                    Debug.Log("MartialHero3 hit Musashi (Atk1) for " + attack1Damage + " damage!");
-                }
-            }
+            ApplyDamage(attackPoint1, attack1Radius, attack1Damage);
         }
 
-        // Được gọi trong Animation Event của Attack2
+        // Được gọi trong Animation Event của Attack2 hoặc từ DamageRoutine
         public void DealDamageAttack2()
         {
-            if (attackPoint2 == null) return;
-            Collider2D hitPlayer = Physics2D.OverlapCircle(attackPoint2.position, attack2Radius, playerLayer);
+            if (hasDealtDamageThisAttack) return;
+            hasDealtDamageThisAttack = true;
 
-            if (hitPlayer != null)
-            {
-                Player p = hitPlayer.GetComponent<Player>();
-                if (p != null)
-                {
-                    p.TakeDamage(attack2Damage);
-                    Debug.Log("MartialHero3 hit Musashi (Atk2) for " + attack2Damage + " damage!");
-                }
-            }
+            ApplyDamage(attackPoint2, attack2Radius, attack2Damage);
         }
 
-        // Được gọi trong Animation Event của Attack3
+        // Được gọi trong Animation Event của Attack3 hoặc từ DamageRoutine
         public void DealDamageAttack3()
         {
-            Transform atkPoint = attackPoint3 != null ? attackPoint3 : attackPoint2;
-            if (atkPoint == null) return;
-            Collider2D hitPlayer = Physics2D.OverlapCircle(atkPoint.position, attack3Radius, playerLayer);
+            if (hasDealtDamageThisAttack) return;
+            hasDealtDamageThisAttack = true;
 
-            if (hitPlayer != null)
+            Transform atkPoint = attackPoint3 != null ? attackPoint3 : attackPoint2;
+            ApplyDamage(atkPoint, attack3Radius, attack3Damage);
+        }
+
+        private void ApplyDamage(Transform atkPoint, float radius, float damage)
+        {
+            bool hit = false;
+            if (atkPoint != null)
             {
-                Player p = hitPlayer.GetComponent<Player>();
-                if (p != null)
+                float rad = radius > 0.2f ? radius : 1.6f;
+                Collider2D[] hits = Physics2D.OverlapCircleAll(atkPoint.position, rad, playerLayer);
+                foreach (var col in hits)
                 {
-                    p.TakeDamage(attack3Damage);
-                    Debug.Log("MartialHero3 hit Musashi (Atk3) for " + attack3Damage + " damage!");
+                    Player p = col.GetComponentInParent<Player>();
+                    if (p != null && p.currentHealth > 0)
+                    {
+                        p.TakeDamage(damage);
+                        hit = true;
+                        break;
+                    }
+                }
+            }
+
+            // Fallback nếu OverlapCircle bị lệch
+            if (!hit && playerScript != null && playerScript.currentHealth > 0)
+            {
+                float absX = Mathf.Abs(player.position.x - transform.position.x);
+                float yDiff = Mathf.Abs(player.position.y - transform.position.y);
+                if (absX <= attackRange + 0.6f && yDiff <= 2.2f)
+                {
+                    playerScript.TakeDamage(damage);
                 }
             }
         }
