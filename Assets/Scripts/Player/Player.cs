@@ -616,7 +616,7 @@ public class Player : MonoBehaviour
         {
             if (sakeCount > 0 && currentStamina < maxStamina)
             {
-                sakeCount--;
+                sakeCount--; // Trừ 1 bình trong túi
                 Musashi.Core.GameSessionTracker.SakeUsed++;
 
                 if (anim != null)
