@@ -135,6 +135,12 @@ namespace Musashi.UI
                 return;
             }
 
+            // Nếu đang hiển thị màn hình Thắng hoặc Thua thì không mở PauseMenu
+            if (GameEndManager.Instance != null && GameEndManager.Instance.CurrentState != GameEndManager.EndGameType.None)
+            {
+                return;
+            }
+
             if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.P))
             {
                 if (IsPaused)

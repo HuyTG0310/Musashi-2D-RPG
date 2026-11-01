@@ -812,6 +812,12 @@ namespace Assets.Scripts.Enemies.Map4
 
             // Khởi động chuỗi biến mất dứt khoát sau khi gục ngã
             StartCoroutine(DeathDisappearRoutine());
+
+            // Kích hoạt hiệu ứng Chiến Thắng (Victory UI: Slow-motion 2s tôn vinh nhát chém cuối)
+            if (Musashi.UI.GameEndManager.Instance != null)
+            {
+                Musashi.UI.GameEndManager.Instance.TriggerVictory();
+            }
         }
 
         private IEnumerator DeathDisappearRoutine()

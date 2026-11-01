@@ -155,8 +155,8 @@ MonoBehaviour:
   currentHealth: 0
   defense: 70
   moveSpeed: 7.55
-  hurtSound: {fileID: 0}
-  deathSound: {fileID: 0}
+  hurtSound: {fileID: 8300000, guid: b6567cd14b32d8c49a20c65f816bd5dc, type: 3}
+  deathSound: {fileID: 8300000, guid: b6567cd14b32d8c49a20c65f816bd5dc, type: 3}
   healthBarFill: {fileID: 1174796192692164905}
   coinPrefab: {fileID: 3969643675363155990, guid: 86a3a6a750e24a44e8c9875d32656394, type: 3}
   minCoins: 3
