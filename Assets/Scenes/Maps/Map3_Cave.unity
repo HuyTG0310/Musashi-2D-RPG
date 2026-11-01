@@ -35619,7 +35619,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damage: 15
-  damageOverTime: 0
+  damageOverTime: 1
   damageInterval: 0.8
   playerLayer:
     serializedVersion: 2
@@ -118075,13 +118075,17 @@ PrefabInstance:
       propertyPath: playerScript
       value: 
       objectReference: {fileID: 930080099}
+    - target: {fileID: 2401904381984633791, guid: 194f7674fdd038a4f927c6a78fb2cbc8, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2846243544314277843, guid: 194f7674fdd038a4f927c6a78fb2cbc8, type: 3}
       propertyPath: m_AnchoredPosition.x
       value: 526
       objectReference: {fileID: 0}
     - target: {fileID: 2846243544314277843, guid: 194f7674fdd038a4f927c6a78fb2cbc8, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -26
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5245261349039211538, guid: 194f7674fdd038a4f927c6a78fb2cbc8, type: 3}
       propertyPath: m_Pivot.x
@@ -118174,6 +118178,10 @@ PrefabInstance:
     - target: {fileID: 7032489320022122552, guid: 194f7674fdd038a4f927c6a78fb2cbc8, type: 3}
       propertyPath: m_Name
       value: HUDCanvas
+      objectReference: {fileID: 0}
+    - target: {fileID: 7830917598214886859, guid: 194f7674fdd038a4f927c6a78fb2cbc8, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -119215,7 +119223,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damage: 15
-  damageOverTime: 0
+  damageOverTime: 1
   damageInterval: 0.8
   playerLayer:
     serializedVersion: 2
@@ -119829,7 +119837,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damage: 15
-  damageOverTime: 0
+  damageOverTime: 1
   damageInterval: 0.8
   playerLayer:
     serializedVersion: 2
@@ -248644,7 +248652,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1345005567}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 3.5, y: 22.1, z: 0}
+  m_LocalPosition: {x: 1.1, y: 23.35, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -248926,7 +248934,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damage: 15
-  damageOverTime: 0
+  damageOverTime: 1
   damageInterval: 0.8
   playerLayer:
     serializedVersion: 2
@@ -249070,7 +249078,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1363629112}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 453.54, y: 16.06, z: 0}
+  m_LocalPosition: {x: 453.56, y: 15.19, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -250207,7 +250215,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damage: 15
-  damageOverTime: 0
+  damageOverTime: 1
   damageInterval: 0.8
   playerLayer:
     serializedVersion: 2
@@ -262975,7 +262983,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damage: 15
-  damageOverTime: 0
+  damageOverTime: 1
   damageInterval: 0.8
   playerLayer:
     serializedVersion: 2
@@ -263466,7 +263474,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damage: 15
-  damageOverTime: 0
+  damageOverTime: 1
   damageInterval: 0.8
   playerLayer:
     serializedVersion: 2
@@ -263875,7 +263883,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 5061679661247546486, guid: bc47c2e21d4065748a2c5689a5cfdb35, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -31
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5990072537478122708, guid: bc47c2e21d4065748a2c5689a5cfdb35, type: 3}
       propertyPath: m_Pivot.x
@@ -263979,7 +263987,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6317758748429507984, guid: bc47c2e21d4065748a2c5689a5cfdb35, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -30.699951
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8375326470185673436, guid: bc47c2e21d4065748a2c5689a5cfdb35, type: 3}
       propertyPath: m_Name

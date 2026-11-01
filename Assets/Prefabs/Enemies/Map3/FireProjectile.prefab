@@ -182,7 +182,7 @@ MonoBehaviour:
   wallLayer:
     serializedVersion: 2
     m_Bits: 0
-  explosionSound: {fileID: 0}
+  explosionSound: {fileID: 8300000, guid: fe5dd2b8545c30846a9b551b9133ff2a, type: 3}
 --- !u!95 &1880689493883490562
 Animator:
   serializedVersion: 5
