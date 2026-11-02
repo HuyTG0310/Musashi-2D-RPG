@@ -272,7 +272,7 @@ MonoBehaviour:
   playerLayer:
     serializedVersion: 2
     m_Bits: 8
-  meleeSound: {fileID: 8300000, guid: 20ae595ffdc94fdc86420683f0c6897f, type: 3}
+  meleeSound: {fileID: 8300000, guid: f52cf23c45074747ac4359acf53421a5, type: 3}
 --- !u!50 &2688546918494345694
 Rigidbody2D:
   serializedVersion: 4
@@ -386,7 +386,7 @@ MonoBehaviour:
   throwMaxRange: 9
   throwCooldown: 2
   lastThrowTime: -999
-  throwSound: {fileID: 8300000, guid: b3776996a75e2ad4f85d436d59c547b7, type: 3}
+  throwSound: {fileID: 8300000, guid: 5ab3ea47839449aba3efe32c2b26fcf8, type: 3}
 --- !u!1 &4452836697531028428
 GameObject:
   m_ObjectHideFlags: 0

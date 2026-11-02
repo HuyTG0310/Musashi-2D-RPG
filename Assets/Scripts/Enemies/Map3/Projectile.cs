@@ -104,7 +104,15 @@ namespace Assets.Scripts.Enemies.Map3
 
             if (explosionSound != null)
             {
-                AudioSource.PlayClipAtPoint(explosionSound, transform.position);
+                AudioManager am = FindAnyObjectByType<AudioManager>();
+                if (am != null)
+                {
+                    am.PlayerSFX(explosionSound);
+                }
+                else
+                {
+                    AudioSource.PlayClipAtPoint(explosionSound, transform.position);
+                }
             }
         }
 

@@ -290,8 +290,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   patrolDistance: 5
-  attack1Sound: {fileID: 8300000, guid: f0ae4d6508cf4936bbe8106e19c1ebc8, type: 3}
-  attack2Sound: {fileID: 8300000, guid: f0ae4d6508cf4936bbe8106e19c1ebc8, type: 3}
+  attack1Sound: {fileID: 8300000, guid: 96b263a91688414a8778b07b4fff63a8, type: 3}
+  attack2Sound: {fileID: 8300000, guid: 585bcbf6ee57401f8825d42111e72a80, type: 3}
 --- !u!1 &8457756398289458084
 GameObject:
   m_ObjectHideFlags: 0

@@ -203,6 +203,9 @@ namespace Assets.Scripts.Enemies.Map3
         // được gọi trong animation Attack1 (đòn nhẹ) của MartialHero2
         public void DealDamageAttack1()
         {
+            // Phát âm thanh đòn 1 đúng frame ra đòn
+            TriggerAttack1Sound();
+
             Collider2D hitPlayer = Physics2D.OverlapCircle(attackPoint1.position, attack1Radius, playerLayer);
 
             if (hitPlayer != null)
@@ -218,6 +221,9 @@ namespace Assets.Scripts.Enemies.Map3
         // được gọi trong animation Attack2 (đòn mạnh) của MartialHero2
         public void DealDamageAttack2()
         {
+            // Phát âm thanh đòn 2 đúng frame ra đòn
+            TriggerAttack2Sound();
+
             Collider2D hitPlayer = Physics2D.OverlapCircle(attackPoint2.position, attack2Radius, playerLayer);
 
             if (hitPlayer != null)
@@ -247,17 +253,25 @@ namespace Assets.Scripts.Enemies.Map3
         }
 
 
-        private void TriggerAttack1Sound()
+        public void TriggerAttack1Sound()
         {
-            if (audioManager != null)
+            if (audioManager == null)
+            {
+                audioManager = FindAnyObjectByType<AudioManager>();
+            }
+            if (audioManager != null && attack1Sound != null)
             {
                 audioManager.PlayerSFX(attack1Sound);
             }
         }
 
-        private void TriggerAttack2Sound()
+        public void TriggerAttack2Sound()
         {
-            if (audioManager != null)
+            if (audioManager == null)
+            {
+                audioManager = FindAnyObjectByType<AudioManager>();
+            }
+            if (audioManager != null && attack2Sound != null)
             {
                 audioManager.PlayerSFX(attack2Sound);
             }
