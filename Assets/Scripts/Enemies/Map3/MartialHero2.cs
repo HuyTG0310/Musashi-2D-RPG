@@ -34,6 +34,15 @@ namespace Assets.Scripts.Enemies.Map3
         public AudioClip attack1Sound;
         public AudioClip attack2Sound;
 
+        // đang trong combo Attack1 -> Attack2 thì không di chuyển
+        private bool isAttacking = false;
+        private float lastCheckedHealth = -1f; // phát hiện vừa bị đánh (máu giảm) để tự giải phóng isAttacking
+
+        // chống giật khi patrol (gộp các điều kiện Flip thành 1 quyết định/frame + cooldown)
+        private float lastPatrolFlipTime = -999f;
+        private const float patrolFlipCooldown = 0.3f;
+
+
         protected override void Start()
         {
             base.Start();
@@ -47,25 +56,52 @@ namespace Assets.Scripts.Enemies.Map3
 
         void FixedUpdate()
         {
-            //if (isDead || currentHealth <= 0 || player == null)
-            //{
-            //    return;
-            //}
+            if (currentHealth <= 0 || player == null)
+            {
+                return;
+            }
 
-            // tính khoảng cách đến player
+            // phát hiện vừa bị đánh trúng (máu giảm) trong lúc đang isAttacking ->
+            // animation Attack có thể đã bị Hurt ngắt giữa chừng, khiến Event EndAttack()
+            // không bao giờ được gọi -> tự giải phóng isAttacking để tránh kẹt vĩnh viễn
+            if (lastCheckedHealth < 0f)
+            {
+                lastCheckedHealth = currentHealth;
+            }
+            else if (currentHealth < lastCheckedHealth)
+            {
+                isAttacking = false;
+                lastCheckedHealth = currentHealth;
+            }
+            else
+            {
+                lastCheckedHealth = currentHealth;
+            }
+
+            // Trong toàn bộ combo Attack1 -> Attack2: tuyệt đối không di chuyển theo Player
+            if (isAttacking)
+            {
+                rb.velocity = Vector2.zero;
+                anim.SetBool("isRunning", false);
+                return;
+            }
+
             float distanceToPlayer = Vector2.Distance(transform.position, player.position);
 
-            // nếu trong vùng tấn công và player còn sống
-            if (distanceToPlayer <= attackRange && playerScript.currentHealth > 0)
+            if (playerScript.currentHealth <= 0)
+            {
+                Patrol();
+                return;
+            }
+
+            if (distanceToPlayer <= attackRange)
             {
                 AttackPlayer();
             }
-            // nếu nằm trong khoảng đuổi theo player và player còn sống
-            else if (distanceToPlayer <= chaseRange && playerScript.currentHealth > 0)
+            else if (distanceToPlayer <= chaseRange)
             {
                 ChasePlayer();
             }
-            // còn lại nằm ngoài vùng hoặc player chết thì đi tuần
             else
             {
                 Patrol();
@@ -82,10 +118,6 @@ namespace Assets.Scripts.Enemies.Map3
             transform.localScale = new Vector3(-currentScale.x, currentScale.y, currentScale.z);
         }
 
-        // thời điểm Flip gần nhất lúc patrol, dùng để chống giật (debounce)
-        private float lastPatrolFlipTime = -999f;
-        private const float patrolFlipCooldown = 0.3f; // tối thiểu 0.3s giữa 2 lần Flip liên tiếp lúc patrol
-
         // method đi tuần tra trong 1 khoảng cách cố định quanh điểm spawn
         private void Patrol()
         {
@@ -95,18 +127,19 @@ namespace Assets.Scripts.Enemies.Map3
             float direction = facingRight ? 1f : -1f;
             rb.velocity = new Vector2(direction * moveSpeed, rb.velocity.y);
 
-            // gộp CẢ 2 điều kiện vào 1 quyết định Flip DUY NHẤT mỗi frame,
-            // tránh trường hợp Flip() bị gọi 2 lần liên tiếp trong cùng frame
-            // (patrolDistance trước, rồi groundCheck đọc nhầm vị trí đã lật ngay sau đó -> giật)
+            // gộp CẢ 3 điều kiện vào 1 quyết định Flip DUY NHẤT mỗi frame (chống double-flip gây giật)
             bool reachedPatrolLimit =
                 (transform.position.x >= startPosition.x + patrolDistance && facingRight) ||
                 (transform.position.x <= startPosition.x - patrolDistance && !facingRight);
 
             bool isGrounded = Physics2D.OverlapCircle(groundCheck.position, 0.25f, groundLayer);
 
-            // thêm cooldown chống giật: dù điều kiện Flip có liên tục đúng/sai sát ranh giới,
-            // cũng không cho phép Flip quá nhanh liên tiếp
-            if ((reachedPatrolLimit || !isGrounded) && Time.time >= lastPatrolFlipTime + patrolFlipCooldown)
+            // dò tường chắn ngang - groundCheck chỉ bắt được hố/vực, không bắt được tường thẳng đứng
+            bool hitWall = wallCheck != null && Physics2D.OverlapCircle(wallCheck.position, 0.2f, groundLayer);
+
+            // cooldown chống giật: không cho Flip quá nhanh liên tiếp dù điều kiện dao động sát ranh giới
+            if ((reachedPatrolLimit || !isGrounded || hitWall) &&
+                Time.time >= lastPatrolFlipTime + patrolFlipCooldown)
             {
                 Flip();
                 lastPatrolFlipTime = Time.time;
@@ -123,7 +156,6 @@ namespace Assets.Scripts.Enemies.Map3
             float flipDeadzone = 0.15f;
             float xDifference = player.position.x - transform.position.x;
 
-            // chỉ đổi hướng khi chênh lệch đủ lớn, tránh lật qua lật lại liên tục
             if (xDifference > flipDeadzone && !facingRight)
             {
                 Flip();
@@ -133,51 +165,74 @@ namespace Assets.Scripts.Enemies.Map3
                 Flip();
             }
 
-            // di chuyển theo hướng đã xác định
             float moveDirection = facingRight ? 1f : -1f;
             rb.velocity = new Vector2(moveDirection * moveSpeed, rb.velocity.y);
         }
 
-        // hàm kích hoạt animation tấn công player, chọn đòn nhẹ hoặc đòn mạnh
+        // hàm kích hoạt animation tấn công player
         private void AttackPlayer()
         {
-            // lập tức đứng yên ko di chuyển
             rb.velocity = Vector2.zero;
             anim.SetBool("isRunning", false);
 
-            // đủ thời gian hồi chiêu thì tấn công (lastAttackTime chỉ được cập nhật ở đây,
-            // không hề bị TakeDamage/hurt đụng vào, nên dù bị player đánh liên tục,
-            // thời gian hồi chiêu vẫn đếm liên tục không bị ngắt/reset)
+            // Quay mặt về Player
+            float xDifference = player.position.x - transform.position.x;
+
+            if (xDifference > 0 && !facingRight)
+            {
+                Flip();
+            }
+            else if (xDifference < 0 && facingRight)
+            {
+                Flip();
+            }
+
+            // Chỉ bắt đầu trạng thái attack khi thực sự trigger animation
             if (Time.time >= lastAttackTime + attackCooldown)
             {
-                // chỉ cần bắn trigger attack1 để khởi động combo
-                // Animator sẽ tự động nối tiếp Atk1 -> Atk2 (không cần code can thiệp)
+                isAttacking = true;
+
+                // chỉ bắn trigger attack1, Animator tự nối tiếp attack1 -> attack2
                 anim.SetTrigger("attack1");
+
                 lastAttackTime = Time.time;
             }
         }
 
+
         // được gọi trong animation Attack1 (đòn nhẹ) của MartialHero2
         public void DealDamageAttack1()
         {
+            // Phát âm thanh đòn 1 đúng frame ra đòn
+            TriggerAttack1Sound();
+
             Collider2D hitPlayer = Physics2D.OverlapCircle(attackPoint1.position, attack1Radius, playerLayer);
 
             if (hitPlayer != null)
             {
-                Player playerHit = hitPlayer.GetComponent<Player>();
-                playerHit.TakeDamage(attack1Damage);
+                Player playerHit = hitPlayer.GetComponentInParent<Player>();
+                if (playerHit != null)
+                {
+                    playerHit.TakeDamage(attack1Damage);
+                }
             }
         }
 
         // được gọi trong animation Attack2 (đòn mạnh) của MartialHero2
         public void DealDamageAttack2()
         {
+            // Phát âm thanh đòn 2 đúng frame ra đòn
+            TriggerAttack2Sound();
+
             Collider2D hitPlayer = Physics2D.OverlapCircle(attackPoint2.position, attack2Radius, playerLayer);
 
             if (hitPlayer != null)
             {
-                Player playerHit = hitPlayer.GetComponent<Player>();
-                playerHit.TakeDamage(attack2Damage);
+                Player playerHit = hitPlayer.GetComponentInParent<Player>();
+                if (playerHit != null)
+                {
+                    playerHit.TakeDamage(attack2Damage);
+                }
             }
         }
 
@@ -198,20 +253,34 @@ namespace Assets.Scripts.Enemies.Map3
         }
 
 
-        private void TriggerAttack1Sound()
+        public void TriggerAttack1Sound()
         {
-            if (audioManager != null)
+            if (audioManager == null)
+            {
+                audioManager = FindAnyObjectByType<AudioManager>();
+            }
+            if (audioManager != null && attack1Sound != null)
             {
                 audioManager.PlayerSFX(attack1Sound);
             }
         }
 
-        private void TriggerAttack2Sound()
+        public void TriggerAttack2Sound()
         {
-            if (audioManager != null)
+            if (audioManager == null)
+            {
+                audioManager = FindAnyObjectByType<AudioManager>();
+            }
+            if (audioManager != null && attack2Sound != null)
             {
                 audioManager.PlayerSFX(attack2Sound);
             }
+        }
+
+        // Gọi bằng Animation Event ở frame cuối clip Atk2 (kết thúc combo)
+        public void EndAttack()
+        {
+            isAttacking = false;
         }
     }
 }
