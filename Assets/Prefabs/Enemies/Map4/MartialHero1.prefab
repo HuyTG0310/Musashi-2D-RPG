@@ -24,7 +24,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2388556629016732935}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.6, y: -2, z: 0}
+  m_LocalPosition: {x: 0.016, y: -1.758, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -61,7 +61,7 @@ Transform:
   m_GameObject: {fileID: 4616122770255771121}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -40.1, y: 0.81, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.632, y: 0.612, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 9135469653681606095}
@@ -156,7 +156,7 @@ Rigidbody2D:
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
-  m_Mass: 1
+  m_Mass: 2.6508622
   m_LinearDrag: 0
   m_AngularDrag: 0.05
   m_GravityScale: 1
@@ -167,7 +167,7 @@ Rigidbody2D:
   m_ExcludeLayers:
     serializedVersion: 2
     m_Bits: 0
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 4
@@ -203,7 +203,7 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0.0023479462, y: 0.26504588}
+  m_Offset: {x: -0.16934586, y: 0.19616103}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -214,7 +214,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 1.6474953, y: 3.2869868}
+  m_Size: {x: 2.14328, y: 3.1977148}
   m_EdgeRadius: 0
 --- !u!114 &8950012168576367017
 MonoBehaviour:
@@ -238,9 +238,9 @@ MonoBehaviour:
   coinPrefab: {fileID: 3969643675363155990, guid: 86a3a6a750e24a44e8c9875d32656394, type: 3}
   minCoins: 5
   maxCoins: 10
-  chaseRange: 15
-  attackRange: 3
-  attackCooldown: 1.4
+  chaseRange: 7
+  attackRange: 1.4
+  attackCooldown: 3
   attackDamage: 35
   lastAttackTime: 0
   facingRight: 1
@@ -249,8 +249,9 @@ MonoBehaviour:
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
+  patrolDistance: 5
   attackPoint: {fileID: 2085268924356581837}
-  attackRadius: 3
+  attackRadius: 0.8
   playerLayer:
     serializedVersion: 2
     m_Bits: 8
@@ -279,7 +280,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7648339913708041652}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.8, y: -0.5, z: 0}
+  m_LocalPosition: {x: 1.12, y: -1.28, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -310,7 +311,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8437412342912581285}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.6, y: -0.5, z: 0}
+  m_LocalPosition: {x: 2, y: -0.13, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

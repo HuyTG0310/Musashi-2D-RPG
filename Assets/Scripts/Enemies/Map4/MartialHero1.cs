@@ -5,9 +5,9 @@ namespace Assets.Scripts.Enemies.Map4
     public class MartialHero1 : EnemyBase
     {
         [Header("MartialHero1 AI & Combat")]
-        public float chaseRange = 7f;        // Tầm nhìn phát hiện người chơi
-        public float attackRange = 1.6f;     // Tầm đánh cận chiến
-        public float attackCooldown = 1.4f;  // Thời gian hồi chiêu
+        public float chaseRange = 7f;        // Tầm nhìn phát hiện người chơi (đồng bộ với MartialHero2)
+        public float attackRange = 1.4f;     // Tầm đánh cận chiến (đồng bộ với MartialHero2)
+        public float attackCooldown = 3.0f;  // Thời gian hồi chiêu (đồng bộ với MartialHero2)
         public float attackDamage = 35f;     // Sát thương đòn đánh
         public float lastAttackTime;
 
@@ -16,10 +16,12 @@ namespace Assets.Scripts.Enemies.Map4
         public Transform groundCheck;
         public Transform wallCheck;
         public LayerMask groundLayer;
+        public float patrolDistance = 5f;    // Khoảng cách tuần tra (đồng bộ với MartialHero2)
+        private Vector3 startPosition;       // Vị trí spawn ban đầu
 
         [Header("MartialHero1 Attack")]
         public Transform attackPoint;
-        public float attackRadius = 0.8f;
+        public float attackRadius = 0.8f;    // Bán kính tấn công (đồng bộ với MartialHero2)
         public LayerMask playerLayer;
 
         [Header("MartialHero1 Sounds")]
@@ -31,6 +33,7 @@ namespace Assets.Scripts.Enemies.Map4
             facingRight = true;
             float randomOffset = Random.Range(-0.3f, 0.3f);
             moveSpeed += randomOffset;
+            startPosition = transform.position;
         }
 
         void Update()
@@ -68,12 +71,16 @@ namespace Assets.Scripts.Enemies.Map4
             }
         }
 
-        // Đổi hướng nhân vật
+        // Đổi hướng nhân vật (bảo toàn scale Y và Z)
         private void Flip()
         {
             facingRight = !facingRight;
-            transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
+            Vector3 currentScale = transform.localScale;
+            transform.localScale = new Vector3(-currentScale.x, currentScale.y, currentScale.z);
         }
+
+        private float lastPatrolFlipTime = -999f;
+        private const float patrolFlipCooldown = 0.3f;
 
         // Tuần tra khu vực
         private void Patrol()
@@ -83,13 +90,17 @@ namespace Assets.Scripts.Enemies.Map4
             float direction = facingRight ? 1f : -1f;
             rb.velocity = new Vector2(direction * moveSpeed, rb.velocity.y);
 
-            bool isGrounded = groundCheck != null && Physics2D.OverlapCircle(groundCheck.position, 0.2f, groundLayer);
+            bool reachedLimit = (transform.position.x >= startPosition.x + patrolDistance && facingRight) ||
+                                (transform.position.x <= startPosition.x - patrolDistance && !facingRight);
+
+            bool isGrounded = groundCheck != null && Physics2D.OverlapCircle(groundCheck.position, 0.25f, groundLayer);
             bool isWallHit = wallCheck != null && Physics2D.OverlapCircle(wallCheck.position, 0.2f, groundLayer);
 
-            // Đổi hướng nếu gặp mép vực hoặc chạm tường
-            if (!isGrounded || isWallHit)
+            // Đổi hướng nếu gặp mép vực, chạm tường hoặc vượt cự ly patrol
+            if ((reachedLimit || !isGrounded || isWallHit) && Time.time >= lastPatrolFlipTime + patrolFlipCooldown)
             {
                 Flip();
+                lastPatrolFlipTime = Time.time;
             }
         }
 
@@ -98,11 +109,14 @@ namespace Assets.Scripts.Enemies.Map4
         {
             anim.SetBool("isRunning", true);
 
-            if (player.position.x > transform.position.x && !facingRight)
+            float flipDeadzone = 0.15f;
+            float xDiff = player.position.x - transform.position.x;
+
+            if (xDiff > flipDeadzone && !facingRight)
             {
                 Flip();
             }
-            else if (player.position.x < transform.position.x && facingRight)
+            else if (xDiff < -flipDeadzone && facingRight)
             {
                 Flip();
             }
@@ -132,7 +146,7 @@ namespace Assets.Scripts.Enemies.Map4
             Collider2D hitPlayer = Physics2D.OverlapCircle(attackPoint.position, attackRadius, playerLayer);
             if (hitPlayer != null)
             {
-                Player target = hitPlayer.GetComponent<Player>();
+                Player target = hitPlayer.GetComponentInParent<Player>();
                 if (target != null)
                 {
                     target.TakeDamage(attackDamage);
@@ -162,3 +176,4 @@ namespace Assets.Scripts.Enemies.Map4
         }
     }
 }
+
