@@ -16,7 +16,7 @@ namespace Assets.Scripts.Enemies.Map4
         public Transform groundCheck;
         public Transform wallCheck;
         public LayerMask groundLayer;
-        public float patrolDistance = 3f;   // Khoảng cách tuần tra (đồng bộ với HeroKnight2)
+        public float patrolDistance = 4f;   // Khoảng cách tuần tra (đồng bộ với HeroKnight2)
         private Vector3 startPosition;      // Vị trí spawn ban đầu
 
         [Header("HeroKnight1 Attack")]
