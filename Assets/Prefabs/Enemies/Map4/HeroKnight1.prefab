@@ -29,8 +29,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1755396298607793446}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -41.78, y: 0.88, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: -41.694, y: 1.2215, z: 0}
+  m_LocalScale: {x: 0.631, y: 0.612, z: 0.8037406}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1182998541634416946}
@@ -115,7 +115,7 @@ Rigidbody2D:
   m_ExcludeLayers:
     serializedVersion: 2
     m_Bits: 0
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 4
@@ -151,7 +151,7 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0.40140915, y: 0.12154508}
+  m_Offset: {x: 0.42191303, y: 0.037522554}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -162,7 +162,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 3.058487, y: 3.4711175}
+  m_Size: {x: 3.2638056, y: 3.2541184}
   m_EdgeRadius: 0
 --- !u!114 &8589812962374354656
 MonoBehaviour:
@@ -179,17 +179,17 @@ MonoBehaviour:
   maxHealth: 150
   currentHealth: 0
   defense: 70
-  moveSpeed: 2
+  moveSpeed: 6
   hurtSound: {fileID: 8300000, guid: 515b671c8a01ab4489a60e8fe21dfb32, type: 3}
   deathSound: {fileID: 8300000, guid: 9f87dc07a0201ec4bad07692b4e9fe88, type: 3}
   healthBarFill: {fileID: 5365762492897838497}
   coinPrefab: {fileID: 3969643675363155990, guid: 86a3a6a750e24a44e8c9875d32656394, type: 3}
   minCoins: 5
   maxCoins: 10
-  chaseRange: 6.5
-  attackRange: 1.8
+  chaseRange: 7
+  attackRange: 1.5
   attackCooldown: 1.5
-  attackDamage: 35
+  attackDamage: 30
   lastAttackTime: 0
   facingRight: 1
   groundCheck: {fileID: 1182998541634416946}
@@ -197,8 +197,9 @@ MonoBehaviour:
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
+  patrolDistance: 3
   attackPoint: {fileID: 3587745761568797425}
-  attackRadius: 0.9
+  attackRadius: 1.5
   playerLayer:
     serializedVersion: 2
     m_Bits: 8
@@ -248,7 +249,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3868528465998969206}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.65, y: 1.46, z: 0}
+  m_LocalPosition: {x: 0.95, y: 0.14, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -279,7 +280,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4113310770608550273}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.16, y: -0.16, z: 0}
+  m_LocalPosition: {x: 1.006, y: -0.59, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -310,7 +311,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8072034815286584698}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.13, y: -1.59, z: 0}
+  m_LocalPosition: {x: 0.02, y: -0.85, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
