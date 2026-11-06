@@ -5,10 +5,10 @@ namespace Assets.Scripts.Enemies.Map4
     public class HeroKnight1 : EnemyBase
     {
         [Header("HeroKnight1 AI & Combat")]
-        public float chaseRange = 6.5f;     // Tầm nhìn phát hiện người chơi
-        public float attackRange = 1.8f;    // Tầm đánh cận chiến
+        public float chaseRange = 7f;       // Tầm nhìn phát hiện người chơi (đồng bộ với HeroKnight2)
+        public float attackRange = 1.5f;    // Tầm đánh cận chiến (đồng bộ với HeroKnight2)
         public float attackCooldown = 1.5f; // Thời gian hồi chiêu
-        public float attackDamage = 35f;    // Sát thương đòn đánh
+        public float attackDamage = 30f;    // Sát thương đòn đánh (đồng bộ với HeroKnight2)
         public float lastAttackTime;
 
         [Header("HeroKnight1 Movement")]
@@ -16,10 +16,12 @@ namespace Assets.Scripts.Enemies.Map4
         public Transform groundCheck;
         public Transform wallCheck;
         public LayerMask groundLayer;
+        public float patrolDistance = 4f;   // Khoảng cách tuần tra (đồng bộ với HeroKnight2)
+        private Vector3 startPosition;      // Vị trí spawn ban đầu
 
         [Header("HeroKnight1 Attack")]
         public Transform attackPoint;
-        public float attackRadius = 0.9f;
+        public float attackRadius = 1.5f;   // Bán kính vùng đánh (đồng bộ với HeroKnight2)
         public LayerMask playerLayer;
 
         [Header("HeroKnight1 Sounds")]
@@ -31,6 +33,7 @@ namespace Assets.Scripts.Enemies.Map4
             facingRight = true;
             float randomOffset = Random.Range(-0.3f, 0.3f);
             moveSpeed += randomOffset;
+            startPosition = transform.position;
         }
 
         void Update()
@@ -72,7 +75,8 @@ namespace Assets.Scripts.Enemies.Map4
         private void Flip()
         {
             facingRight = !facingRight;
-            transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
+            Vector3 currentScale = transform.localScale;
+            transform.localScale = new Vector3(-currentScale.x, currentScale.y, currentScale.z);
         }
 
         // Tuần tra khu vực
@@ -83,11 +87,14 @@ namespace Assets.Scripts.Enemies.Map4
             float direction = facingRight ? 1f : -1f;
             rb.velocity = new Vector2(direction * moveSpeed, rb.velocity.y);
 
+            bool reachedLimit = (transform.position.x >= startPosition.x + patrolDistance && facingRight) ||
+                                (transform.position.x <= startPosition.x - patrolDistance && !facingRight);
+
             bool isGrounded = groundCheck != null && Physics2D.OverlapCircle(groundCheck.position, 0.2f, groundLayer);
             bool isWallHit = wallCheck != null && Physics2D.OverlapCircle(wallCheck.position, 0.2f, groundLayer);
 
-            // Đổi hướng nếu gặp mép vực hoặc chạm tường
-            if (!isGrounded || isWallHit)
+            // Đổi hướng nếu gặp mép vực, chạm tường hoặc hết cự ly tuần tra
+            if (reachedLimit || !isGrounded || isWallHit)
             {
                 Flip();
             }
@@ -98,11 +105,14 @@ namespace Assets.Scripts.Enemies.Map4
         {
             anim.SetBool("isRunning", true);
 
-            if (player.position.x > transform.position.x && !facingRight)
+            float flipDeadzone = 0.15f;
+            float xDiff = player.position.x - transform.position.x;
+
+            if (xDiff > flipDeadzone && !facingRight)
             {
                 Flip();
             }
-            else if (player.position.x < transform.position.x && facingRight)
+            else if (xDiff < -flipDeadzone && facingRight)
             {
                 Flip();
             }
@@ -132,7 +142,7 @@ namespace Assets.Scripts.Enemies.Map4
             Collider2D hitPlayer = Physics2D.OverlapCircle(attackPoint.position, attackRadius, playerLayer);
             if (hitPlayer != null)
             {
-                Player target = hitPlayer.GetComponent<Player>();
+                Player target = hitPlayer.GetComponentInParent<Player>();
                 if (target != null)
                 {
                     target.TakeDamage(attackDamage);
@@ -162,3 +172,4 @@ namespace Assets.Scripts.Enemies.Map4
         }
     }
 }
+

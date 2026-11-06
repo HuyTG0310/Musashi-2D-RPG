@@ -432,6 +432,8 @@ namespace Assets.Scripts.Enemies.Map3
             if (!isBusy)
                 return;
 
+            // Phát âm thanh đâm giáo đúng frame tấn công
+            TriggerMeleeSound();
 
             DealMeleeDamage(
                 meleeDamageHit1
@@ -450,6 +452,8 @@ namespace Assets.Scripts.Enemies.Map3
             if (!isBusy)
                 return;
 
+            // Phát âm thanh đâm giáo đúng frame tấn công
+            TriggerMeleeSound();
 
             DealMeleeDamage(
                 meleeDamageHit2
@@ -510,13 +514,15 @@ namespace Assets.Scripts.Enemies.Map3
         // MELEE SOUND
         // =========================================================
 
-        private void TriggerMeleeSound()
+        public void TriggerMeleeSound()
         {
-            if (audioManager != null)
+            if (audioManager == null)
             {
-                audioManager.PlayerSFX(
-                    meleeSound
-                );
+                audioManager = FindAnyObjectByType<AudioManager>();
+            }
+            if (audioManager != null && meleeSound != null)
+            {
+                audioManager.PlayerSFX(meleeSound);
             }
         }
 

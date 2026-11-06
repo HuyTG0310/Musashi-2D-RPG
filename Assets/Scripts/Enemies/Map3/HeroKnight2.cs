@@ -313,6 +313,9 @@ namespace Assets.Scripts.Enemies.Map1
         // tại frame HeroKnight2 vung kiếm trúng Player
         public void DealDamageToPlayer()
         {
+            // Phát âm thanh chém kiếm đồng bộ đúng frame vung kiếm trúng
+            TriggerAtkHandSound();
+
             // Kiểm tra Player trong vùng đánh
             Collider2D hitPlayer = Physics2D.OverlapCircle(
                 attackPoint.position,
@@ -354,9 +357,13 @@ namespace Assets.Scripts.Enemies.Map1
 
         // Hàm này được gọi bằng Animation Event
         // tại frame phát âm thanh đánh
-        private void TriggerAtkHandSound()
+        public void TriggerAtkHandSound()
         {
-            if (audioManager != null)
+            if (audioManager == null)
+            {
+                audioManager = FindAnyObjectByType<AudioManager>();
+            }
+            if (audioManager != null && attackSound != null)
             {
                 audioManager.PlayerSFX(attackSound);
             }

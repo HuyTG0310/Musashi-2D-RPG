@@ -158,6 +158,7 @@ namespace Assets.Scripts.Enemies.Map3
         // Gọi bằng Animation Event tại đúng frame FireWorm phun lửa ra
         public void SpawnFireProjectile()
         {
+            TriggerAttackSound();
             Debug.Log(gameObject.name + ": SpawnFireProjectile() được gọi lúc " + Time.time);
 
             if (fireProjectilePrefab == null || firePoint == null)
@@ -178,9 +179,13 @@ namespace Assets.Scripts.Enemies.Map3
             }
         }
 
-        private void TriggerAttackSound()
+        public void TriggerAttackSound()
         {
-            if (audioManager != null)
+            if (audioManager == null)
+            {
+                audioManager = FindAnyObjectByType<AudioManager>();
+            }
+            if (audioManager != null && attackSound != null)
             {
                 audioManager.PlayerSFX(attackSound);
             }
