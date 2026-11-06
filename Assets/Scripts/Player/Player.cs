@@ -63,6 +63,7 @@ public class Player : MonoBehaviour
     public AudioClip hurtSound;
     public AudioClip deathSound;
     public AudioClip healthSound;
+    public AudioClip eatAppleSound;
 
     public Image hpFillImage;
     private bool isDefending;
@@ -447,7 +448,13 @@ public class Player : MonoBehaviour
         {
             appleCount--;
             Musashi.Core.GameSessionTracker.ApplesUsed++;
-            currentHealth += 50;
+
+            if (audioManager != null && eatAppleSound != null)
+            {
+                audioManager.PlayerSFX(eatAppleSound);
+            }
+
+            currentHealth += 100;
 
             if (currentHealth > maxHealth)
             {
