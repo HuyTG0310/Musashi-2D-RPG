@@ -53,6 +53,10 @@ namespace Assets.Scripts.Enemies.Map3
             Spear spear = Instantiate(spearPrefab, spearSpawnPoint.position, Quaternion.identity);
             spear.Launch(facing, spearSpeed, spearDamage);
 
+            if (audioManager == null)
+            {
+                audioManager = FindAnyObjectByType<AudioManager>();
+            }
             if (audioManager != null && throwSound != null)
             {
                 audioManager.PlayerSFX(throwSound);
