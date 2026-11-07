@@ -1,4 +1,5 @@
 using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -31,6 +32,12 @@ namespace Assets.Scripts.Enemies.Map4
         public string bossName = "LÃNH CHÚA SA MẠC - TOSHIZO";
         public BossPhase currentPhase = BossPhase.Phase1_Normal;
         public BossActionState actionState = BossActionState.Idle;
+
+        [Header("--- PHASE 2 SETTINGS ---")]
+        [Range(10, 90)] public float phase2ThresholdPercent = 50f; // Máu tụt xuống <= 50% thì chuyển Phase 2
+        public bool refillHealthOnPhase2 = true; // Hồi đầy cây máu lửa khi chuyển sang Phase 2
+        public bool testTriggerPhase2Now = false; // Tích chọn trong Inspector để test chuyển Phase 2 ngay
+        public bool testTriggerPhase1Now = false; // Tích chọn trong Inspector để test trở về Phase 1
 
         [Header("--- COMBAT RANGES & TIMERS ---")]
         public float chaseRange = 13f;
@@ -84,7 +91,40 @@ namespace Assets.Scripts.Enemies.Map4
         public AudioClip defendBlockSound;
         public AudioClip roarShoutSound;
 
-        [Header("--- UI BOSS HEALTH BAR ---")]
+        [Header("--- SKULL HEALTH BAR (RED THEME) ---")]
+        public Sprite skullFrameSprite;
+        public Sprite skullBgSprite;
+        public Sprite skullFillPhase1Sprite; // Bản màu đỏ Ruby (Phase 1)
+        public Sprite skullFillPhase2Sprite; // Bản màu lửa bốc cháy (Phase 2)
+        public Color healthBarColor = Color.white; // Giữ nguyên đỏ nguyên bản rực rỡ
+        public bool showScreenHUDBar = true; // Thanh máu lớn ở đỉnh màn hình (mặc định BẬT)
+        public bool showOverheadBar = false; // Ẩn thanh máu nhỏ trên đầu để tập trung vào thanh lớn ở trên
+
+        [Header("--- SCREEN HUD BOSS BAR CUSTOMIZATION ---")]
+        public GameObject hudSkullBarPrefab; // Prefab Boss Skull HealthBar (Assets/Prefabs/UI/BossSkullHealthBar.prefab)
+        [Range(4f, 14f)] public float hudBarScale = 8.5f; // Độ lớn thanh máu lớn ở đỉnh màn hình (8.5x cực to và hoành tráng)
+        public Vector2 hudBarPosition = new Vector2(0f, -40f); // Vị trí trung tâm đỉnh màn hình
+        public bool onlyShowWhenPlayerNearby = true; // Chỉ hiện thanh máu khi Musashi tiến vào khu vực Boss
+        public float bossTriggerDistance = 14f; // Khoảng cách Musashi bước vào để thanh máu xuất hiện (mặc định 14m)
+        public string phase1Subtitle = "GIAI ĐOẠN 1: KIẾM ĐẠO SAMURAI";
+        public string phase2Subtitle = "GIAI ĐOẠN 2: HỎA KIẾM THẦN MA (CUỒNG NỘ)";
+
+        [Header("--- RUNTIME SKULL BAR REFS ---")]
+        public GameObject overheadSkullBar;
+        public Image overheadSkullFill;
+        public Image overheadSkullBg;
+        public Image overheadSkullFrame;
+        public TextMeshProUGUI overheadBossTitle;
+
+        public GameObject hudSkullBar;
+        public Image hudSkullFill;
+        public Image hudSkullBg;
+        public Image hudSkullFrame;
+        public TextMeshProUGUI hudBossTitle;
+        public TextMeshProUGUI hudBossSubtitle;
+        public TextMeshProUGUI hudBossHpText;
+
+        [Header("--- LEGACY UI REFS (BACKWARD COMPATIBLE) ---")]
         public Slider bossSliderUI;
         public Image bossFillImage;
         public GameObject bossUIParent;
@@ -97,6 +137,11 @@ namespace Assets.Scripts.Enemies.Map4
         private float normalMoveSpeed;
         private SpriteRenderer bossSpriteRenderer;
         private Coroutine passiveFlameAuraCoroutine;
+
+        protected virtual void Awake()
+        {
+            RemoveOverheadHealthBars();
+        }
 
         protected override void Start()
         {
@@ -114,6 +159,16 @@ namespace Assets.Scripts.Enemies.Map4
 
             bossSpriteRenderer = GetComponent<SpriteRenderer>();
 
+            // Khởi tạo hệ thống thanh máu bản Skull màu đỏ lớn ở đỉnh màn hình
+            try
+            {
+                SetupSkullHealthBar();
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogWarning($"[BossMap4] SetupSkullHealthBar warning: {ex.Message}");
+            }
+
             if (bossUIParent != null)
             {
                 bossUIParent.SetActive(false);
@@ -124,12 +179,30 @@ namespace Assets.Scripts.Enemies.Map4
                 bossNameText.text = bossName;
             }
 
+            UpdateSkullBarPhaseVisuals();
             UpdateBossUI();
         }
 
         private void Update()
         {
-            if (currentHealth <= 0 || player == null || playerScript == null)
+            // Kiểm tra phím tắt hoặc checkbox Inspector để test đổi Phase tức thì
+            if (testTriggerPhase2Now || Input.GetKeyDown(KeyCode.P) || Input.GetKeyDown(KeyCode.Keypad2))
+            {
+                testTriggerPhase2Now = false;
+                TriggerPhase2();
+            }
+            else if (testTriggerPhase1Now || Input.GetKeyDown(KeyCode.O) || Input.GetKeyDown(KeyCode.Keypad1))
+            {
+                testTriggerPhase1Now = false;
+                TriggerPhase1();
+            }
+
+            if (currentHealth <= 0 && currentPhase == BossPhase.Phase2_FlamingEnrage)
+            {
+                return;
+            }
+
+            if (player == null || playerScript == null)
             {
                 return;
             }
@@ -139,10 +212,51 @@ namespace Assets.Scripts.Enemies.Map4
             float verticalDistance = GetVerticalDistToPlayer();
             float distanceToPlayer = Vector2.Distance(GetBossCenter(), GetPlayerCenter());
 
-            // Kích hoạt thanh máu Boss khi Musashi bước vào khu vực giao tranh
-            if (horizontalDistance <= chaseRange && bossUIParent != null && !bossUIParent.activeSelf)
+            // Kiểm tra điều kiện hiển thị thanh máu Boss theo cự ly khu vực Boss
+            bool shouldShowHpBar = !onlyShowWhenPlayerNearby || 
+                                   (horizontalDistance <= bossTriggerDistance) || 
+                                   (currentHealth < maxHealth && horizontalDistance <= bossTriggerDistance + 6f);
+
+            // Bật/tắt thanh máu Screen HUD theo cự ly
+            if (hudSkullBar != null && showScreenHUDBar)
             {
-                bossUIParent.SetActive(true);
+                if (shouldShowHpBar && !hudSkullBar.activeSelf && actionState != BossActionState.Dead)
+                {
+                    hudSkullBar.SetActive(true);
+                }
+                else if (!shouldShowHpBar && hudSkullBar.activeSelf)
+                {
+                    hudSkullBar.SetActive(false);
+                }
+            }
+
+            if (bossUIParent != null)
+            {
+                if (shouldShowHpBar && !bossUIParent.activeSelf && actionState != BossActionState.Dead)
+                {
+                    bossUIParent.SetActive(true);
+                }
+                else if (!shouldShowHpBar && bossUIParent.activeSelf)
+                {
+                    bossUIParent.SetActive(false);
+                }
+            }
+
+            // Nếu đang trong trạng thái gầm nộ hoặc chết thì không xử lý AI di chuyển
+            if (actionState == BossActionState.Shouting || actionState == BossActionState.Dead)
+            {
+                return;
+            }
+
+            // Kích hoạt biến hình nộ khi máu tụt xuống ngưỡng Phase 2
+            if (!hasTransformed && currentPhase == BossPhase.Phase1_Normal)
+            {
+                float threshold = maxHealth * (phase2ThresholdPercent / 100f);
+                if (currentHealth <= threshold)
+                {
+                    StartCoroutine(EnrageTransformationRoutine());
+                    return;
+                }
             }
 
             // Nếu đang bận thi triển kỹ năng thì không xử lý di chuyển AI thông thường
@@ -151,17 +265,8 @@ namespace Assets.Scripts.Enemies.Map4
                 actionState == BossActionState.Backstepping ||
                 actionState == BossActionState.CounterAttacking ||
                 actionState == BossActionState.JumpAttacking ||
-                actionState == BossActionState.Shouting ||
-                actionState == BossActionState.Defending ||
-                actionState == BossActionState.Dead)
+                actionState == BossActionState.Defending)
             {
-                return;
-            }
-
-            // Kích hoạt biến hình nộ khi máu tụt xuống <= 50%
-            if (!hasTransformed && currentHealth <= (maxHealth * 0.5f))
-            {
-                StartCoroutine(EnrageTransformationRoutine());
                 return;
             }
 
@@ -205,7 +310,6 @@ namespace Assets.Scripts.Enemies.Map4
             bool canBackstep = Time.time >= (lastBackstepTime + backstepCooldown);
 
             // 1. TÌNH HUỐNG LÙI BƯỚC NÉ ĐÒN (Tactical Backstep):
-            // Khi Musashi áp sát quá gần (< 2.2m) trong lúc Boss đang hồi chiêu
             if (!canAttack && canBackstep && horizontalDist <= 2.2f && verticalDist <= 1.5f && Random.value < 0.35f)
             {
                 StartCoroutine(ExecuteTacticalBackstep());
@@ -259,7 +363,6 @@ namespace Assets.Scripts.Enemies.Map4
             rb.velocity = new Vector2(0, rb.velocity.y);
         }
 
-        // Chuỗi đòn đánh cận chiến thông minh (Branching Combos)
         private IEnumerator ExecuteMeleeAttackCombo()
         {
             actionState = BossActionState.Attacking;
@@ -268,24 +371,20 @@ namespace Assets.Scripts.Enemies.Map4
 
             if (currentPhase == BossPhase.Phase1_Normal)
             {
-                // PHASE 1: Kiếm Đạo Samurai
                 float roll = Random.value;
 
                 if (roll < 0.35f)
                 {
-                    // Đòn đơn 1: Chém ngang
                     yield return StartCoroutine(PerformAttack(1, attack1Damage, 0.35f, 0.35f));
                 }
                 else if (roll < 0.65f)
                 {
-                    // Combo 2 đòn liên hoàn: Chém 1 -> Chém 2
                     yield return StartCoroutine(PerformAttack(1, attack1Damage, 0.35f, 0.20f));
                     StepForward(1.5f);
                     yield return StartCoroutine(PerformAttack(2, attack2Damage, 0.30f, 0.35f));
                 }
                 else
                 {
-                    // Trọng Kiếm Đâm Phá Giáp (Attack 3): Cảnh báo flash vàng rồi đâm cực mạnh
                     yield return StartCoroutine(FlashColorRoutine(new Color(1f, 0.9f, 0.3f), 0.2f));
                     StepForward(2.2f);
                     yield return StartCoroutine(PerformAttack(3, attack3Damage, 0.40f, 0.40f));
@@ -293,19 +392,16 @@ namespace Assets.Scripts.Enemies.Map4
             }
             else
             {
-                // PHASE 2: Hỏa Kiếm Thần Ma Cuồng Nộ
                 float roll = Random.value;
 
                 if (roll < 0.40f)
                 {
-                    // Hỏa Long Song Trảm: Chém lửa 1 -> Chém lửa 2
                     yield return StartCoroutine(PerformAttack(1, attack1Damage, 0.28f, 0.18f));
                     StepForward(2.0f);
                     yield return StartCoroutine(PerformAttack(2, attack2Damage, 0.25f, 0.25f));
                 }
                 else if (roll < 0.80f)
                 {
-                    // ĐẠI COMBO 3 ĐÒN CUỒNG BẠO: Chém 1 -> Chém 2 -> Trọng Hỏa Kiếm Đâm Kết Liễu
                     yield return StartCoroutine(PerformAttack(1, attack1Damage, 0.25f, 0.15f));
                     StepForward(1.8f);
                     yield return StartCoroutine(PerformAttack(2, attack2Damage, 0.25f, 0.15f));
@@ -315,7 +411,6 @@ namespace Assets.Scripts.Enemies.Map4
                 }
                 else
                 {
-                    // Đòn Chém Nặng Đột Kích (Attack 3 Fire)
                     yield return StartCoroutine(FlashColorRoutine(Color.red, 0.15f));
                     StepForward(3.0f);
                     yield return StartCoroutine(PerformAttack(3, attack3Damage, 0.35f, 0.35f));
@@ -346,13 +441,11 @@ namespace Assets.Scripts.Enemies.Map4
             }
         }
 
-        // Kỹ năng Lướt Kiếm Áp Sát Siêu Tốc (Dash Strike - Phase 2)
         private IEnumerator ExecuteDashStrike()
         {
             actionState = BossActionState.DashStriking;
             anim.SetBool("isRunning", false);
 
-            // Cảnh báo chớp đỏ trước khi phóng đi
             yield return StartCoroutine(FlashColorRoutine(new Color(1f, 0.2f, 0f), 0.15f));
 
             float direction = (player != null && player.position.x > transform.position.x) ? 1f : -1f;
@@ -364,7 +457,6 @@ namespace Assets.Scripts.Enemies.Map4
             PlaySound(flameSlashSound);
             anim.SetTrigger("attack1");
 
-            // Phóng nhanh về phía trước kèm chuỗi bóng mờ
             float dashTime = 0.22f;
             float timer = 0f;
             rb.velocity = new Vector2(direction * 14f, 0);
@@ -388,7 +480,6 @@ namespace Assets.Scripts.Enemies.Map4
             actionState = BossActionState.Idle;
         }
 
-        // Kỹ năng Lùi Bước Né Đòn (Tactical Backstep)
         private IEnumerator ExecuteTacticalBackstep()
         {
             actionState = BossActionState.Backstepping;
@@ -413,13 +504,11 @@ namespace Assets.Scripts.Enemies.Map4
             actionState = BossActionState.Idle;
         }
 
-        // Kỹ năng Nhảy Bổ Áp Sát (Jump Attack)
         private IEnumerator ExecuteJumpAttack()
         {
             actionState = BossActionState.JumpAttacking;
             anim.SetBool("isRunning", false);
 
-            // Cảnh báo trước khi bật nhảy
             yield return StartCoroutine(FlashColorRoutine(Color.white, 0.12f));
             anim.SetTrigger("jumpAttack");
 
@@ -449,7 +538,6 @@ namespace Assets.Scripts.Enemies.Map4
                     SpawnAfterimage(currentPhase == BossPhase.Phase2_FlamingEnrage ? phase2AuraColor : new Color(0.8f, 0.8f, 0.8f, 0.5f), 0.3f);
                 }
 
-                // Chém quét trên không nếu lướt qua Musashi
                 if (!hitInAir)
                 {
                     Collider2D[] airHits = Physics2D.OverlapCircleAll(transform.position + new Vector3(direction * 1.0f, 1.0f, 0), 2.2f);
@@ -465,7 +553,6 @@ namespace Assets.Scripts.Enemies.Map4
                     }
                 }
 
-                // Kiểm tra tiếp đất
                 Vector2 checkPos = groundCheck != null ? (Vector2)groundCheck.position : (Vector2)transform.position;
                 bool isGrounded = Physics2D.OverlapCircle(checkPos, 0.45f, groundLayer) ||
                                   Physics2D.Raycast(checkPos + Vector2.up * 0.2f, Vector2.down, 0.5f, groundLayer);
@@ -478,12 +565,10 @@ namespace Assets.Scripts.Enemies.Map4
                 yield return null;
             }
 
-            // Tiếp đất chấn động
             PlaySound(jumpLandSound);
             DealJumpSlamDamage();
             StartCoroutine(TriggerScreenShake(0.28f, currentPhase == BossPhase.Phase2_FlamingEnrage ? 0.25f : 0.15f));
 
-            // Ở Phase 2: Kích hoạt sóng chấn động lửa lan tỏa trên mặt sàn
             if (currentPhase == BossPhase.Phase2_FlamingEnrage)
             {
                 StartCoroutine(TriggerShockwaveBlast());
@@ -496,13 +581,11 @@ namespace Assets.Scripts.Enemies.Map4
             actionState = BossActionState.Idle;
         }
 
-        // Sóng lửa lan tỏa trên mặt đất (Phase 2 Ground Shockwave)
         private IEnumerator TriggerShockwaveBlast()
         {
             float direction = facingRight ? 1f : -1f;
             Vector3 startPos = transform.position + new Vector3(direction * 1.5f, 0.2f, 0);
 
-            // Sóng lan tỏa trong 3 bước dọc theo sàn
             for (int i = 0; i < 4; i++)
             {
                 Vector3 blastPoint = startPos + new Vector3(direction * (i * 1.5f), 0, 0);
@@ -519,7 +602,6 @@ namespace Assets.Scripts.Enemies.Map4
                     }
                 }
 
-                // Sinh bóng mờ hiệu ứng sóng lửa tại điểm nổ
                 if (enableGhostAfterimage)
                 {
                     SpawnParticleGlow(blastPoint, new Color(1f, 0.3f, 0f, 0.8f));
@@ -547,7 +629,6 @@ namespace Assets.Scripts.Enemies.Map4
                 }
             }
 
-            // Dự phòng chắc chắn 100% trúng khi Musashi đang đứng im phía trước
             if (!hitPlayer && player != null)
             {
                 float hDist = GetHorizontalDistToPlayer();
@@ -613,17 +694,20 @@ namespace Assets.Scripts.Enemies.Map4
                 return;
             }
 
+            if (hudSkullBar != null && !hudSkullBar.activeSelf && showScreenHUDBar)
+            {
+                hudSkullBar.SetActive(true);
+            }
+
             // NẾU ĐANG TRONG TRẠNG THÁI PHÒNG THỦ (Defend) -> CHẶN ĐÒN VÀ PHẢN CÔNG
             if (actionState == BossActionState.Defending)
             {
                 PlaySound(defendBlockSound);
                 StartCoroutine(FlashColorRoutine(Color.cyan, 0.12f));
 
-                // Triệt tiêu sát thương (chỉ nhận tượng trưng 1 HP)
                 currentHealth -= 1f;
                 UpdateBossUI();
 
-                // LẬP TỨC PHẢN CÔNG CHỚP NHOÁNG (Counter Attack)
                 if (defendCoroutine != null) StopCoroutine(defendCoroutine);
                 StartCoroutine(ExecuteCounterAttack());
                 return;
@@ -646,16 +730,41 @@ namespace Assets.Scripts.Enemies.Map4
             float actualDamage = incomingDamage - defense;
             if (actualDamage <= 0) actualDamage = 1f;
 
+            // BẢO VỆ CHỐNG CHẾT ĐỘT TỬ Ở PHASE 1:
+            // Khi máu tụt xuống ngưỡng Phase 2 (mặc định 50%), Boss BẮT BUỘC chuyển Phase, không bao giờ bị chết ở Phase 1!
+            if (!hasTransformed && currentPhase == BossPhase.Phase1_Normal)
+            {
+                float threshold = maxHealth * (phase2ThresholdPercent / 100f);
+                if (currentHealth - actualDamage <= threshold)
+                {
+                    currentHealth = threshold;
+                    UpdateBossUI();
+
+                    StopAllCoroutines();
+                    StartCoroutine(EnrageTransformationRoutine());
+                    return;
+                }
+            }
+
             currentHealth -= actualDamage;
             UpdateBossUI();
 
             if (currentHealth <= 0)
             {
-                Die();
+                if (!hasTransformed)
+                {
+                    currentHealth = maxHealth * (phase2ThresholdPercent / 100f);
+                    UpdateBossUI();
+                    StopAllCoroutines();
+                    StartCoroutine(EnrageTransformationRoutine());
+                }
+                else
+                {
+                    Die();
+                }
             }
             else
             {
-                // Super Armor: Ở Phase 2 hoặc khi đang tung chiêu, không bị ngắt đòn Hurt
                 if (currentPhase != BossPhase.Phase2_FlamingEnrage && actionState == BossActionState.Idle)
                 {
                     anim.SetTrigger("hurt");
@@ -678,13 +787,11 @@ namespace Assets.Scripts.Enemies.Map4
             }
         }
 
-        // Đòn Phản Công Trừng Phạt (Counter Attack khi Musashi chém trúng kiếm thủ)
         private IEnumerator ExecuteCounterAttack()
         {
             actionState = BossActionState.CounterAttacking;
             rb.velocity = Vector2.zero;
 
-            // Flash sáng cảnh báo phản đòn
             yield return StartCoroutine(FlashColorRoutine(Color.yellow, 0.10f));
 
             anim.SetTrigger("attack1");
@@ -698,8 +805,8 @@ namespace Assets.Scripts.Enemies.Map4
             actionState = BossActionState.Idle;
         }
 
-        // BIẾN HÌNH NỘ ĐIỆN ẢNH (Enrage Transformation at <= 50% HP)
-        private IEnumerator EnrageTransformationRoutine()
+        // BIẾN HÌNH NỘ ĐIỆN ẢNH (Enrage Transformation sang Phase 2)
+        public IEnumerator EnrageTransformationRoutine()
         {
             hasTransformed = true;
             currentPhase = BossPhase.Transforming;
@@ -708,59 +815,77 @@ namespace Assets.Scripts.Enemies.Map4
             isInvulnerable = true;
             rb.velocity = Vector2.zero;
 
-            // Kích hoạt hoạt ảnh gầm nộ Shout (12 frames)
             anim.SetTrigger("shout");
             PlaySound(roarShoutSound);
 
-            // Giai đoạn tích tụ sức mạnh (0.6s)
             yield return new WaitForSeconds(0.5f);
 
             // BÙNG NỔ NỘ KHÍ (Shout Blast Wave): Đẩy lùi Musashi & Rung chấn màn hình
-            StartCoroutine(TriggerScreenShake(0.6f, 0.35f));
+            StartCoroutine(TriggerScreenShake(0.7f, 0.40f));
 
             if (player != null)
             {
                 float hDist = GetHorizontalDistToPlayer();
-                if (hDist <= 6.5f)
+                if (hDist <= 7.0f)
                 {
                     Rigidbody2D playerRb = player.GetComponent<Rigidbody2D>();
                     if (playerRb != null)
                     {
                         float knockbackDir = (player.position.x > transform.position.x) ? 1f : -1f;
-                        playerRb.velocity = new Vector2(knockbackDir * 9.5f, 4.5f);
+                        playerRb.velocity = new Vector2(knockbackDir * 10f, 5.0f);
                     }
                 }
             }
 
-            // Chớp sáng hào quang lửa mãnh liệt
-            for (int i = 0; i < 6; i++)
+            // Chuyển đổi giao diện thanh máu sang bản Skull Phase 2 (Đỏ Lửa Rực Rỡ)
+            UpdateSkullBarPhaseVisuals();
+
+            // Hiệu ứng hồi máu lửa từ từ đầy lại cây máu đỏ rực
+            if (refillHealthOnPhase2)
+            {
+                float refillDuration = 0.9f;
+                float elapsedRefill = 0f;
+                float startHp = currentHealth;
+                while (elapsedRefill < refillDuration)
+                {
+                    elapsedRefill += Time.deltaTime;
+                    currentHealth = Mathf.Lerp(startHp, maxHealth, elapsedRefill / refillDuration);
+                    UpdateBossUI();
+                    yield return null;
+                }
+                currentHealth = maxHealth;
+                UpdateBossUI();
+            }
+
+            for (int i = 0; i < 5; i++)
             {
                 StartCoroutine(FlashColorRoutine(new Color(1f, 0.35f, 0f), 0.15f));
                 if (enableGhostAfterimage)
                 {
                     SpawnAfterimage(phase2AuraColor, 0.4f);
                 }
-                yield return new WaitForSeconds(0.20f);
+                yield return new WaitForSeconds(0.18f);
             }
 
-            yield return new WaitForSeconds(0.3f);
+            yield return new WaitForSeconds(0.2f);
 
             // CHÍNH THỨC BƯỚC VÀO PHASE 2: HỎA KIẾM THẦN MA
             currentPhase = BossPhase.Phase2_FlamingEnrage;
             anim.SetBool("isEnraged", true);
+            anim.Play("Boss_Idle_Fire");
+
             moveSpeed = normalMoveSpeed * enragedSpeedMultiplier;
             defense += 10f;
             isInvulnerable = false;
             actionState = BossActionState.Idle;
 
-            // Đổi màu thanh máu sang đỏ rực lửa
-            if (bossFillImage != null)
-            {
-                bossFillImage.color = new Color(1f, 0.25f, 0.05f);
-            }
-
-            // Bắt đầu hào quang lửa nhấp nháy liên tục
+            if (passiveFlameAuraCoroutine != null) StopCoroutine(passiveFlameAuraCoroutine);
             passiveFlameAuraCoroutine = StartCoroutine(PassiveFlamePulseRoutine());
+
+            // Đảm bảo cập nhật giao diện Skull Bar & Boss Subtitle sang Phase 2
+            UpdateSkullBarPhaseVisuals();
+
+            Debug.Log(">>> BOSS MAP 4 ĐÃ CHÍNH THỨC BƯỚC VÀO PHASE 2 (HỎA KIẾM THẦN MA CUỒNG NỘ)! <<<");
         }
 
         private IEnumerator PassiveFlamePulseRoutine()
@@ -778,6 +903,70 @@ namespace Assets.Scripts.Enemies.Map4
                 {
                     yield return null;
                 }
+            }
+        }
+
+        #endregion
+
+        #region --- MANUAL / CONTEXT MENU PHASE CONTROLS (TESTING) ---
+
+        [ContextMenu("Chuyển sang Phase 2 (Hỏa Kiếm Thần Ma)")]
+        public void TriggerPhase2()
+        {
+            if (actionState == BossActionState.Dead) return;
+            StopAllCoroutines();
+            if (passiveFlameAuraCoroutine != null) StopCoroutine(passiveFlameAuraCoroutine);
+            StartCoroutine(EnrageTransformationRoutine());
+        }
+
+        [ContextMenu("Chuyển về Phase 1 (Kiếm Đạo Samurai)")]
+        public void TriggerPhase1()
+        {
+            if (actionState == BossActionState.Dead) return;
+            StopAllCoroutines();
+            if (passiveFlameAuraCoroutine != null) StopCoroutine(passiveFlameAuraCoroutine);
+
+            hasTransformed = false;
+            currentPhase = BossPhase.Phase1_Normal;
+            actionState = BossActionState.Idle;
+            isInvulnerable = false;
+
+            anim.SetBool("isEnraged", false);
+            anim.Play("Boss_Idle");
+
+            moveSpeed = normalMoveSpeed;
+            defense = 25f;
+            currentHealth = maxHealth;
+
+            if (bossSpriteRenderer != null) bossSpriteRenderer.color = Color.white;
+            UpdateSkullBarPhaseVisuals();
+            UpdateBossUI();
+
+            Debug.Log(">>> Boss Map 4 chuyển về Phase 1 (Kiếm Đạo Samurai) thành công! <<<");
+        }
+
+        [ContextMenu("Đổi Phase qua lại (Toggle Phase)")]
+        public void TogglePhase()
+        {
+            if (currentPhase == BossPhase.Phase1_Normal)
+            {
+                TriggerPhase2();
+            }
+            else
+            {
+                TriggerPhase1();
+            }
+        }
+
+        public void SwitchToPhase(BossPhase targetPhase)
+        {
+            if (targetPhase == BossPhase.Phase2_FlamingEnrage)
+            {
+                TriggerPhase2();
+            }
+            else if (targetPhase == BossPhase.Phase1_Normal)
+            {
+                TriggerPhase1();
             }
         }
 
@@ -803,17 +992,18 @@ namespace Assets.Scripts.Enemies.Map4
             rb.gravityScale = 0;
             rb.isKinematic = true;
 
+            if (hudSkullBar != null)
+            {
+                hudSkullBar.SetActive(false);
+            }
             if (bossUIParent != null)
             {
                 bossUIParent.SetActive(false);
             }
 
             DropBossRewards();
-
-            // Khởi động chuỗi biến mất dứt khoát sau khi gục ngã
             StartCoroutine(DeathDisappearRoutine());
 
-            // Kích hoạt hiệu ứng Chiến Thắng (Victory UI: Slow-motion 2s tôn vinh nhát chém cuối)
             if (Musashi.UI.GameEndManager.Instance != null)
             {
                 Musashi.UI.GameEndManager.Instance.TriggerVictory();
@@ -822,16 +1012,13 @@ namespace Assets.Scripts.Enemies.Map4
 
         private IEnumerator DeathDisappearRoutine()
         {
-            // Chờ Boss diễn xong trọn vẹn hoạt ảnh ngã gục (1.6s)
             yield return new WaitForSeconds(1.6f);
 
-            // Tắt hoàn toàn hình ảnh của Boss để đảm bảo không còn hình lưu lại trên màn hình
             if (bossSpriteRenderer != null)
             {
                 bossSpriteRenderer.enabled = false;
             }
 
-            // Hủy vĩnh viễn GameObject của Boss khỏi Scene
             Destroy(this.gameObject);
         }
 
@@ -943,21 +1130,400 @@ namespace Assets.Scripts.Enemies.Map4
 
         #endregion
 
-        #region --- HELPERS & UI ---
+        #region --- SKULL HEALTH BAR SETUP & UI LOGIC ---
+
+        private void SetupSkullHealthBar()
+        {
+            // Tự động nạp tài nguyên Sprite Skull nếu chưa được kéo vào Inspector
+            if (skullFrameSprite == null)
+            {
+                skullFrameSprite = Resources.Load<Sprite>("UI/Sprites/SkullHealthbar/skull_frame");
+            }
+            if (skullBgSprite == null)
+            {
+                skullBgSprite = Resources.Load<Sprite>("UI/Sprites/SkullHealthbar/skull_bg");
+            }
+            if (skullFillPhase1Sprite == null)
+            {
+                skullFillPhase1Sprite = Resources.Load<Sprite>("UI/Sprites/SkullHealthbar/skull_fill");
+            }
+            if (skullFillPhase2Sprite == null)
+            {
+                skullFillPhase2Sprite = Resources.Load<Sprite>("UI/Sprites/SkullHealthbar/skull_fill_phase2");
+            }
+
+            // 1. Cấu hình thanh máu Skull lớn ở đỉnh trung tâm màn hình (Screen HUD) - ƯU TIÊN SỐ 1
+            try
+            {
+                SetupHudSkullBar();
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"[BossMap4] SetupHudSkullBar error: {ex}");
+            }
+
+            // 2. Hủy hoàn toàn mọi thanh máu cũ lơ lửng trên đầu Boss
+            RemoveOverheadHealthBars();
+        }
+
+        private void RemoveOverheadHealthBars()
+        {
+            showOverheadBar = false;
+            overheadSkullBar = null;
+            overheadSkullFill = null;
+            overheadSkullBg = null;
+            overheadSkullFrame = null;
+            overheadBossTitle = null;
+
+            // Quét và xóa sổ vĩnh viễn thanh máu nhỏ trên đầu
+            for (int i = transform.childCount - 1; i >= 0; i--)
+            {
+                Transform child = transform.GetChild(i);
+                if (child == null) continue;
+                if (child.name.Contains("HealthBar") || child.GetComponent<Canvas>() != null)
+                {
+                    child.gameObject.SetActive(false);
+                    Destroy(child.gameObject);
+                }
+            }
+        }
+
+        private void SetupHudSkullBar()
+        {
+            Canvas hudCanvas = null;
+            GameObject hudCanvasObj = GameObject.Find("HUDCanvas");
+            if (hudCanvasObj != null)
+            {
+                hudCanvas = hudCanvasObj.GetComponent<Canvas>();
+            }
+            if (hudCanvas == null)
+            {
+                HUDManager hudMgr = FindAnyObjectByType<HUDManager>();
+                if (hudMgr != null) hudCanvas = hudMgr.GetComponent<Canvas>() ?? hudMgr.GetComponentInParent<Canvas>();
+            }
+            if (hudCanvas == null)
+            {
+                Canvas[] allCanvases = FindObjectsOfType<Canvas>();
+                foreach (var c in allCanvases)
+                {
+                    if (c.renderMode == RenderMode.ScreenSpaceOverlay || c.gameObject.name.Contains("HUD") || c.gameObject.name == "Canvas")
+                    {
+                        hudCanvas = c;
+                        break;
+                    }
+                }
+            }
+
+            if (hudCanvas != null && showScreenHUDBar)
+            {
+                Transform existingHudBar = hudCanvas.transform.Find("BossSkullHUD");
+                if (existingHudBar == null && hudSkullBarPrefab != null)
+                {
+                    GameObject spawned = Instantiate(hudSkullBarPrefab, hudCanvas.transform);
+                    spawned.name = "BossSkullHUD";
+                    existingHudBar = spawned.transform;
+                }
+                if (existingHudBar == null)
+                {
+                    GameObject resPrefab = Resources.Load<GameObject>("UI/BossSkullHealthBar");
+                    if (resPrefab != null)
+                    {
+                        GameObject spawned = Instantiate(resPrefab, hudCanvas.transform);
+                        spawned.name = "BossSkullHUD";
+                        existingHudBar = spawned.transform;
+                    }
+                }
+                if (existingHudBar == null)
+                {
+                    GameObject rootHud = new GameObject("BossSkullHUD");
+                    rootHud.transform.SetParent(hudCanvas.transform, false);
+                    existingHudBar = rootHud.transform;
+                }
+
+                hudSkullBar = existingHudBar.gameObject;
+                RectTransform rootRect = existingHudBar.GetComponent<RectTransform>() ?? existingHudBar.gameObject.AddComponent<RectTransform>();
+
+                // Đảm bảo nổi trên cùng bằng Canvas sorting riêng
+                Canvas barCanvas = existingHudBar.GetComponent<Canvas>();
+                if (barCanvas == null) barCanvas = existingHudBar.gameObject.AddComponent<Canvas>();
+                barCanvas.overrideSorting = true;
+                barCanvas.sortingOrder = 100;
+
+                // Căn chỉnh tuyệt đối ở chính giữa đỉnh màn hình (Top Center)
+                rootRect.anchorMin = new Vector2(0.5f, 1f);
+                rootRect.anchorMax = new Vector2(0.5f, 1f);
+                rootRect.pivot = new Vector2(0.5f, 1f);
+                rootRect.anchoredPosition = hudBarPosition;
+                rootRect.localScale = Vector3.one;
+
+                // Tính toán kích thước phóng đại theo tỷ lệ pixel art chuẩn xác
+                float S = hudBarScale > 0f ? hudBarScale : 8.5f;
+                float frameW = 86f * S;
+                float frameH = 19f * S;
+                float fillW = 67f * S;
+                float fillH = 10f * S;
+                Vector2 fillOffset = new Vector2(-1.5f * S, -0.5f * S);
+
+                rootRect.sizeDelta = new Vector2(frameW, frameH);
+
+                TMP_FontAsset pixelFont = Resources.Load<TMP_FontAsset>("Fonts/PixelOperator8 SDF");
+
+                // 1. Tên Boss - Căn giữa phía trên thanh máu
+                Transform tTrans = existingHudBar.Find("BossTitle");
+                if (tTrans == null)
+                {
+                    GameObject tObj = new GameObject("BossTitle");
+                    tObj.transform.SetParent(existingHudBar, false);
+                    tTrans = tObj.transform;
+                    hudBossTitle = tObj.AddComponent<TextMeshProUGUI>();
+                }
+                else
+                {
+                    hudBossTitle = tTrans.GetComponent<TextMeshProUGUI>();
+                }
+                if (hudBossTitle != null)
+                {
+                    hudBossTitle.text = bossName;
+                    hudBossTitle.fontSize = 24f;
+                    hudBossTitle.fontStyle = FontStyles.Bold;
+                    hudBossTitle.alignment = TextAlignmentOptions.Center;
+                    hudBossTitle.color = new Color(1f, 0.88f, 0.35f);
+                    if (pixelFont != null) hudBossTitle.font = pixelFont;
+                    hudBossTitle.rectTransform.anchorMin = new Vector2(0.5f, 1f);
+                    hudBossTitle.rectTransform.anchorMax = new Vector2(0.5f, 1f);
+                    hudBossTitle.rectTransform.pivot = new Vector2(0.5f, 0f);
+                    hudBossTitle.rectTransform.anchoredPosition = new Vector2(0f, 22f);
+                    hudBossTitle.rectTransform.sizeDelta = new Vector2(800f, 36f);
+                }
+
+                // 2. Phụ đề Phase - Nằm ngay dưới tên Boss
+                Transform subTrans = existingHudBar.Find("BossSubtitle");
+                if (subTrans == null)
+                {
+                    GameObject sObj = new GameObject("BossSubtitle");
+                    sObj.transform.SetParent(existingHudBar, false);
+                    subTrans = sObj.transform;
+                    hudBossSubtitle = sObj.AddComponent<TextMeshProUGUI>();
+                }
+                else
+                {
+                    hudBossSubtitle = subTrans.GetComponent<TextMeshProUGUI>();
+                }
+                if (hudBossSubtitle != null)
+                {
+                    hudBossSubtitle.text = phase1Subtitle;
+                    hudBossSubtitle.fontSize = 13f;
+                    hudBossSubtitle.alignment = TextAlignmentOptions.Center;
+                    hudBossSubtitle.color = new Color(1f, 0.75f, 0.45f);
+                    if (pixelFont != null) hudBossSubtitle.font = pixelFont;
+                    hudBossSubtitle.rectTransform.anchorMin = new Vector2(0.5f, 1f);
+                    hudBossSubtitle.rectTransform.anchorMax = new Vector2(0.5f, 1f);
+                    hudBossSubtitle.rectTransform.pivot = new Vector2(0.5f, 0f);
+                    hudBossSubtitle.rectTransform.anchoredPosition = new Vector2(0f, 0f);
+                    hudBossSubtitle.rectTransform.sizeDelta = new Vector2(800f, 22f);
+                }
+
+                // 3. Background - Rãnh tối màu
+                Transform bgTrans = existingHudBar.Find("HUD_BG");
+                if (bgTrans == null)
+                {
+                    GameObject bgObj = new GameObject("HUD_BG");
+                    bgObj.transform.SetParent(existingHudBar, false);
+                    bgTrans = bgObj.transform;
+                    hudSkullBg = bgObj.AddComponent<Image>();
+                }
+                else
+                {
+                    hudSkullBg = bgTrans.GetComponent<Image>();
+                }
+                if (hudSkullBg != null)
+                {
+                    if (skullBgSprite != null) hudSkullBg.sprite = skullBgSprite;
+                    hudSkullBg.type = Image.Type.Simple;
+                    hudSkullBg.color = Color.white;
+                    hudSkullBg.rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
+                    hudSkullBg.rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
+                    hudSkullBg.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+                    hudSkullBg.rectTransform.anchoredPosition = fillOffset;
+                    hudSkullBg.rectTransform.sizeDelta = new Vector2(fillW, fillH);
+                }
+
+                // 4. Fill - Thanh máu đỏ to lớn rực rỡ
+                Transform fillTrans = existingHudBar.Find("HUD_Fill");
+                if (fillTrans == null)
+                {
+                    GameObject fillObj = new GameObject("HUD_Fill");
+                    fillObj.transform.SetParent(existingHudBar, false);
+                    fillTrans = fillObj.transform;
+                    hudSkullFill = fillObj.AddComponent<Image>();
+                }
+                else
+                {
+                    hudSkullFill = fillTrans.GetComponent<Image>();
+                }
+                if (hudSkullFill != null)
+                {
+                    if (skullFillPhase1Sprite != null) hudSkullFill.sprite = skullFillPhase1Sprite;
+                    hudSkullFill.type = Image.Type.Filled;
+                    hudSkullFill.fillMethod = Image.FillMethod.Horizontal;
+                    hudSkullFill.fillOrigin = (int)Image.OriginHorizontal.Left;
+                    hudSkullFill.fillAmount = 1f;
+                    hudSkullFill.color = healthBarColor;
+                    hudSkullFill.rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
+                    hudSkullFill.rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
+                    hudSkullFill.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+                    hudSkullFill.rectTransform.anchoredPosition = fillOffset;
+                    hudSkullFill.rectTransform.sizeDelta = new Vector2(fillW, fillH);
+                }
+
+                // 5. Frame Skull - Khung đầu lâu to lớn đè lên trên
+                Transform frameTrans = existingHudBar.Find("HUD_Frame");
+                if (frameTrans == null)
+                {
+                    GameObject frObj = new GameObject("HUD_Frame");
+                    frObj.transform.SetParent(existingHudBar, false);
+                    frameTrans = frObj.transform;
+                    hudSkullFrame = frObj.AddComponent<Image>();
+                }
+                else
+                {
+                    hudSkullFrame = frameTrans.GetComponent<Image>();
+                }
+                if (hudSkullFrame != null)
+                {
+                    if (skullFrameSprite != null) hudSkullFrame.sprite = skullFrameSprite;
+                    hudSkullFrame.type = Image.Type.Simple;
+                    hudSkullFrame.color = Color.white;
+                    hudSkullFrame.raycastTarget = false;
+                    hudSkullFrame.rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
+                    hudSkullFrame.rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
+                    hudSkullFrame.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+                    hudSkullFrame.rectTransform.anchoredPosition = Vector2.zero;
+                    hudSkullFrame.rectTransform.sizeDelta = new Vector2(frameW, frameH);
+                }
+
+                // 6. Số lượng máu HP - Hiển thị ngay giữa thanh máu
+                Transform hpNumTrans = existingHudBar.Find("HUD_HpText");
+                if (hpNumTrans == null)
+                {
+                    GameObject hpObj = new GameObject("HUD_HpText");
+                    hpObj.transform.SetParent(existingHudBar, false);
+                    hpNumTrans = hpObj.transform;
+                    hudBossHpText = hpObj.AddComponent<TextMeshProUGUI>();
+                }
+                else
+                {
+                    hudBossHpText = hpNumTrans.GetComponent<TextMeshProUGUI>();
+                }
+                if (hudBossHpText != null)
+                {
+                    hudBossHpText.fontSize = 15f;
+                    hudBossHpText.fontStyle = FontStyles.Bold;
+                    hudBossHpText.alignment = TextAlignmentOptions.Center;
+                    hudBossHpText.color = Color.white;
+                    if (pixelFont != null) hudBossHpText.font = pixelFont;
+                    hudBossHpText.rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
+                    hudBossHpText.rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
+                    hudBossHpText.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+                    hudBossHpText.rectTransform.anchoredPosition = fillOffset;
+                    hudBossHpText.rectTransform.sizeDelta = new Vector2(fillW, 30f);
+                }
+
+                if (bgTrans != null)
+                {
+                    bgTrans.gameObject.SetActive(true);
+                    bgTrans.SetSiblingIndex(0);
+                }
+                if (fillTrans != null)
+                {
+                    fillTrans.gameObject.SetActive(true);
+                    fillTrans.SetSiblingIndex(1);
+                }
+                if (frameTrans != null)
+                {
+                    frameTrans.gameObject.SetActive(true);
+                    frameTrans.SetSiblingIndex(2);
+                }
+                if (hpNumTrans != null)
+                {
+                    hpNumTrans.gameObject.SetActive(true);
+                    hpNumTrans.SetSiblingIndex(3);
+                }
+                if (tTrans != null) tTrans.gameObject.SetActive(true);
+                if (subTrans != null) subTrans.gameObject.SetActive(true);
+
+                healthBarFill = hudSkullFill;
+
+                // Mặc định ẩn ban đầu, chỉ hiện khi Musashi tiếp cận khu vực Boss
+                hudSkullBar.SetActive(!onlyShowWhenPlayerNearby);
+            }
+        }
+
+        private void UpdateSkullBarPhaseVisuals()
+        {
+            bool isPhase2 = currentPhase == BossPhase.Phase2_FlamingEnrage || currentPhase == BossPhase.Transforming;
+            Sprite targetFill = isPhase2 ? skullFillPhase2Sprite : skullFillPhase1Sprite;
+
+            if (hudSkullBar != null)
+            {
+                if (hudSkullFill == null)
+                {
+                    Transform fillTr = hudSkullBar.transform.Find("HUD_Fill");
+                    if (fillTr != null) hudSkullFill = fillTr.GetComponent<Image>();
+                }
+                if (hudBossSubtitle == null)
+                {
+                    Transform subTr = hudSkullBar.transform.Find("BossSubtitle");
+                    if (subTr != null) hudBossSubtitle = subTr.GetComponent<TextMeshProUGUI>();
+                }
+            }
+
+            if (hudSkullFill != null && targetFill != null)
+            {
+                hudSkullFill.sprite = targetFill;
+                hudSkullFill.color = healthBarColor;
+            }
+
+            if (hudBossSubtitle != null)
+            {
+                hudBossSubtitle.text = isPhase2 ? phase2Subtitle : phase1Subtitle;
+                hudBossSubtitle.color = isPhase2 ? new Color(1f, 0.35f, 0.1f) : new Color(1f, 0.75f, 0.45f);
+                hudBossSubtitle.ForceMeshUpdate();
+            }
+
+            if (bossFillImage != null)
+            {
+                bossFillImage.color = isPhase2 ? new Color(1f, 0.25f, 0.05f) : Color.red;
+            }
+        }
 
         private void UpdateBossUI()
         {
-            if (bossSliderUI != null)
-            {
-                bossSliderUI.value = currentHealth / maxHealth;
-            }
-            if (bossFillImage != null)
-            {
-                bossFillImage.fillAmount = currentHealth / maxHealth;
-            }
+            float fillRatio = Mathf.Clamp01(currentHealth / maxHealth);
+
             if (healthBarFill != null)
             {
-                healthBarFill.fillAmount = currentHealth / maxHealth;
+                healthBarFill.fillAmount = fillRatio;
+            }
+
+            if (hudSkullFill != null)
+            {
+                hudSkullFill.fillAmount = fillRatio;
+            }
+
+            if (bossSliderUI != null)
+            {
+                bossSliderUI.value = fillRatio;
+            }
+
+            if (bossFillImage != null)
+            {
+                bossFillImage.fillAmount = fillRatio;
+            }
+
+            if (hudBossHpText != null)
+            {
+                hudBossHpText.text = $"{Mathf.CeilToInt(currentHealth)} / {Mathf.CeilToInt(maxHealth)}";
             }
         }
 

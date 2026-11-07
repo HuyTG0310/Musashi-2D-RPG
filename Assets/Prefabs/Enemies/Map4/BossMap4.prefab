@@ -37,7 +37,6 @@ Transform:
   - {fileID: 3000000002}
   - {fileID: 4000000002}
   - {fileID: 5000000002}
-  - {fileID: 5008786472348448527}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -204,13 +203,17 @@ MonoBehaviour:
   moveSpeed: 2.8
   hurtSound: {fileID: 8300000, guid: 515b671c8a01ab4489a60e8fe21dfb32, type: 3}
   deathSound: {fileID: 8300000, guid: 9f87dc07a0201ec4bad07692b4e9fe88, type: 3}
-  healthBarFill: {fileID: 1722817267121923017}
+  healthBarFill: {fileID: 0}
   coinPrefab: {fileID: 3969643675363155990, guid: 86a3a6a750e24a44e8c9875d32656394, type: 3}
   minCoins: 20
   maxCoins: 40
-  bossName: "L\xC3NH CH\xDAA SA M\u1EA0C - TOSHIZO"
+  bossName: DEMON SAMYRAI - TOSHIZO
   currentPhase: 0
   actionState: 0
+  phase2ThresholdPercent: 50
+  refillHealthOnPhase2: 1
+  testTriggerPhase2Now: 0
+  testTriggerPhase1Now: 0
   chaseRange: 13
   meleeAttackRange: 3.2
   dashStrikeMinDistance: 3.8
@@ -250,6 +253,32 @@ MonoBehaviour:
   jumpLandSound: {fileID: 8300000, guid: 7d98b6c44694477469599eb7e37d6c4f, type: 3}
   defendBlockSound: {fileID: 8300000, guid: 7d98b6c44694477469599eb7e37d6c4f, type: 3}
   roarShoutSound: {fileID: 8300000, guid: 515b671c8a01ab4489a60e8fe21dfb32, type: 3}
+  skullFrameSprite: {fileID: 21300000, guid: 2dd2f13775d74de89ed82ad0c2ec4d3b, type: 3}
+  skullBgSprite: {fileID: 21300000, guid: 6dd95fe61a2546279a59659c5327b537, type: 3}
+  skullFillPhase1Sprite: {fileID: 21300000, guid: 1253a369f38440eeb95d8c35700e159b, type: 3}
+  skullFillPhase2Sprite: {fileID: 21300000, guid: fc186d49e44447ec8d2011faabe5166d, type: 3}
+  healthBarColor: {r: 1, g: 1, b: 1, a: 1}
+  showScreenHUDBar: 1
+  showOverheadBar: 0
+  hudSkullBarPrefab: {fileID: 100001, guid: d5de467e9c514240be57c855003d6238, type: 3}
+  hudBarScale: 8.5
+  hudBarPosition: {x: 0, y: -40}
+  onlyShowWhenPlayerNearby: 1
+  bossTriggerDistance: 14
+  phase1Subtitle: "GIAI \u0110O\u1EA0N 1: KI\u1EBEM \u0110\u1EA0O SAMURAI"
+  phase2Subtitle: "GIAI \u0110O\u1EA0N 2: H\u1ECEA KI\u1EBEM TH\u1EA6N MA (CU\u1ED2NG N\u1ED8)"
+  overheadSkullBar: {fileID: 0}
+  overheadSkullFill: {fileID: 0}
+  overheadSkullBg: {fileID: 0}
+  overheadSkullFrame: {fileID: 0}
+  overheadBossTitle: {fileID: 0}
+  hudSkullBar: {fileID: 0}
+  hudSkullFill: {fileID: 0}
+  hudSkullBg: {fileID: 0}
+  hudSkullFrame: {fileID: 0}
+  hudBossTitle: {fileID: 0}
+  hudBossSubtitle: {fileID: 0}
+  hudBossHpText: {fileID: 0}
   bossSliderUI: {fileID: 0}
   bossFillImage: {fileID: 0}
   bossUIParent: {fileID: 0}
@@ -380,60 +409,3 @@ Transform:
   m_Father: {fileID: 1000000002}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1001 &6000000001
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 1000000002}
-    m_Modifications:
-    - target: {fileID: 5008786476200938254, guid: 423bc8775884729498cbdde8799017d8, type: 3}
-      propertyPath: m_RootOrder
-      value: -1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5008786476200938254, guid: 423bc8775884729498cbdde8799017d8, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5008786476200938254, guid: 423bc8775884729498cbdde8799017d8, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5008786476200938254, guid: 423bc8775884729498cbdde8799017d8, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5008786476200938254, guid: 423bc8775884729498cbdde8799017d8, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: 3.26
-      objectReference: {fileID: 0}
-    - target: {fileID: 5717916019667438014, guid: 423bc8775884729498cbdde8799017d8, type: 3}
-      propertyPath: m_Name
-      value: HealthBar
-      objectReference: {fileID: 0}
-    - target: {fileID: 8136583210180189212, guid: 423bc8775884729498cbdde8799017d8, type: 3}
-      propertyPath: m_PresetInfoIsWorld
-      value: 1
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 423bc8775884729498cbdde8799017d8, type: 3}
---- !u!114 &1722817267121923017 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 1722817263403704264, guid: 423bc8775884729498cbdde8799017d8, type: 3}
-  m_PrefabInstance: {fileID: 6000000001}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!224 &5008786472348448527 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 5008786476200938254, guid: 423bc8775884729498cbdde8799017d8, type: 3}
-  m_PrefabInstance: {fileID: 6000000001}
-  m_PrefabAsset: {fileID: 0}
