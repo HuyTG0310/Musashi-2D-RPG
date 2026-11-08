@@ -4434,6 +4434,9 @@ MonoBehaviour:
     <color=#FFD700>  [ 1 ]</color><pos=350><color=#888888>:</color> 
     <pos=385><color=#FFFFFF>Eat Apple (Heal HP)</color>
 
+    <color=#FFD700>  [ 2 ]</color><pos=350><color=#888888>:</color> 
+    <pos=385><color=#FFFFFF>Drink Sake (Restore SP)</color>
+
     <color=#FFD700>  [ E
     ]</color><pos=350><color=#888888>:</color>  <pos=385><color=#FFFFFF>Open Shop
     (Near NPC)</color>

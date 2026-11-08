@@ -181,12 +181,10 @@ namespace Musashi.UI
             if (pauseMenuUI != null) pauseMenuUI.SetActive(false);
             if (pauseButtonObj != null) pauseButtonObj.SetActive(true);
 
-            // Hủy Player.instance hiện tại để khi reload lại scene, Player đặt sẵn trong scene
-            // sẽ được khởi tạo mới hoàn toàn ở vị trí ban đầu (spawn point), đầy đủ máu và chỉ số.
+            // Giữ nguyên Player.instance và các thông số (HP, SP, Coin, Apples, Sake, Shurikens)
             if (Player.instance != null)
             {
-                Destroy(Player.instance.gameObject);
-                Player.instance = null;
+                Player.instance.ResetForRestart(keepHealthAndStamina: true);
             }
 
             Scene activeScene = SceneManager.GetActiveScene();

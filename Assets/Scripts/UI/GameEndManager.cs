@@ -510,10 +510,10 @@ namespace Musashi.UI
             if (audioSource != null) audioSource.Stop();
             Time.timeScale = 1f;
 
+            // Giữ nguyên Player.instance và các thông số (HP, SP, Coin, Apples, Sake, Shurikens)
             if (Player.instance != null)
             {
-                Destroy(Player.instance.gameObject);
-                Player.instance = null;
+                Player.instance.ResetForRestart(keepHealthAndStamina: true);
             }
 
             GameSessionTracker.ResetSession();

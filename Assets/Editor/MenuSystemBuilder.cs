@@ -304,6 +304,7 @@ namespace Musashi.EditorTools
                 "<color=#FFD700>  [ U ]</color><pos=350><color=#888888>:</color>  <pos=385><color=#FFFFFF>Throw Shuriken</color>\n" +
                 "<color=#FFD700>  [ C ]</color><pos=350><color=#888888>:</color>  <pos=385><color=#FFFFFF>Dash</color>\n" +
                 "<color=#FFD700>  [ 1 ]</color><pos=350><color=#888888>:</color>  <pos=385><color=#FFFFFF>Eat Apple (Heal HP)</color>\n" +
+                "<color=#FFD700>  [ 2 ]</color><pos=350><color=#888888>:</color>  <pos=385><color=#FFFFFF>Drink Sake (Restore SP)</color>\n" +
                 "<color=#FFD700>  [ E ]</color><pos=350><color=#888888>:</color>  <pos=385><color=#FFFFFF>Open Shop (Near NPC)</color>\n" +
                 "<color=#FFD700>  [ ESC ]</color><pos=350><color=#888888>:</color>  <pos=385><color=#FFFFFF>Pause Game</color>";
 
