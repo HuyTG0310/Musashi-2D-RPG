@@ -1,4 +1,5 @@
-﻿using System.Collections;
+using System.Collections;
+using Cinemachine;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -87,6 +88,23 @@ public class Player : MonoBehaviour
         else if (instance != this)
         {
             // Da co Musashi tu scene truoc (DontDestroyOnLoad).
+            // Neu scene nay khong co PlayerSpawn rieng, dat vi tri instance tai vi tri duoc dat san trong scene nay:
+            if (FindAnyObjectByType<PlayerSpawn>() == null)
+            {
+                Vector3 delta = transform.position - instance.transform.position;
+                instance.transform.position = transform.position;
+                instance.transform.rotation = transform.rotation;
+                Rigidbody2D irb = instance.GetComponent<Rigidbody2D>();
+                if (irb != null) irb.velocity = Vector2.zero;
+
+                CinemachineVirtualCamera vcam = FindAnyObjectByType<CinemachineVirtualCamera>();
+                if (vcam != null)
+                {
+                    vcam.Follow = instance.transform;
+                    vcam.OnTargetObjectWarped(instance.transform, delta);
+                }
+            }
+
             // Huy ban nay trong scene moi, giu Musashi cu voi day du trang thai (HP, items...).
             Destroy(gameObject);
         }
@@ -106,20 +124,85 @@ public class Player : MonoBehaviour
     {
         audioManager = FindAnyObjectByType<AudioManager>();
         RebindHUD();
+
+        CinemachineVirtualCamera vcam = FindAnyObjectByType<CinemachineVirtualCamera>();
+        if (vcam != null && vcam.Follow != transform)
+        {
+            vcam.Follow = transform;
+        }
+
+        Musashi.Core.GameSessionTracker.RegisterInitialInventory(coins, appleCount, shurikenCount, sakeCount);
     }
 
     public void RebindHUD()
     {
-        if (hpFillImage == null || !hpFillImage.gameObject.activeInHierarchy)
+        GameObject hpObj = GameObject.Find("HealthBarFill");
+        if (hpObj != null) hpFillImage = hpObj.GetComponent<Image>();
+
+        GameObject spObj = GameObject.Find("StaminaBarFill");
+        if (spObj != null) spFillImage = spObj.GetComponent<Image>();
+
+        UpdateHealthUI();
+        UpdateStaminahUI();
+    }
+
+    /// <summary>
+    /// Reset lai trang thai hanh dong, vat ly cua Musashi khi nhan nut Restart,
+    /// dong thoi bao toan tron ven cac thong so (HP, SP, Coin, Apples, Sake, Shuriken).
+    /// </summary>
+    public void ResetForRestart(bool keepHealthAndStamina = true)
+    {
+        this.enabled = true;
+        if (rb != null)
         {
-            GameObject hpObj = GameObject.Find("HealthBarFill");
-            if (hpObj != null) hpFillImage = hpObj.GetComponent<Image>();
+            rb.simulated = true;
+            rb.velocity = Vector2.zero;
         }
 
-        if (spFillImage == null || !spFillImage.gameObject.activeInHierarchy)
+        isDashing = false;
+        isDefending = false;
+        isWalking = false;
+        isRunning = false;
+        isMoving = false;
+        isHoldingShift = false;
+        isGrounded = true;
+        noOfClicks = 0;
+
+        if (spriteRenderer != null)
         {
-            GameObject spObj = GameObject.Find("StaminaBarFill");
-            if (spObj != null) spFillImage = spObj.GetComponent<Image>();
+            spriteRenderer.color = Color.white;
+        }
+
+        transform.localScale = new Vector3(1, 1, 1);
+        facingRight = true;
+
+        if (anim != null)
+        {
+            anim.ResetTrigger("hurt");
+            anim.ResetTrigger("death");
+            anim.ResetTrigger("throw");
+            anim.ResetTrigger("dash");
+            anim.ResetTrigger("heal");
+            anim.SetBool("atk1", false);
+            anim.SetBool("atk2", false);
+            anim.SetBool("atk3", false);
+            anim.SetBool("isDefending", false);
+            anim.SetBool("isRunning", false);
+            anim.SetBool("isWalking", false);
+            anim.SetBool("isGrounded", true);
+            anim.Play("Idle", 0, 0f);
+        }
+
+        if (!keepHealthAndStamina || currentHealth <= 0)
+        {
+            currentHealth = maxHealth;
+            currentStamina = maxStamina;
+        }
+        else
+        {
+            if (currentHealth > maxHealth) currentHealth = maxHealth;
+            if (currentStamina > maxStamina) currentStamina = maxStamina;
+            if (currentStamina < 0) currentStamina = 0;
         }
 
         UpdateHealthUI();
@@ -619,12 +702,17 @@ public class Player : MonoBehaviour
     }
     private void UseSakeGourd()
     {
-        if (Input.GetKeyDown(KeyCode.Alpha3))
+        if (Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Alpha3))
         {
             if (sakeCount > 0 && currentStamina < maxStamina)
             {
                 sakeCount--; // Trừ 1 bình trong túi
                 Musashi.Core.GameSessionTracker.SakeUsed++;
+
+                if (audioManager != null && healthSound != null)
+                {
+                    audioManager.PlayerSFX(healthSound);
+                }
 
                 if (anim != null)
                 {
