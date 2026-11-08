@@ -35,7 +35,8 @@ namespace Musashi.EditorTools
         public static void BuildMenuSystemInternal(bool showDialog)
         {
             // 1. Load Font assets & Button sprite
-            TMP_FontAsset customFont = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/Sprites/UI_Elements/PixelOperator8 SDF.asset");
+            TMP_FontAsset customFont = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/Resources/Fonts/PixelOperator8 SDF.asset")
+                                       ?? AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/Sprites/UI_Elements/PixelOperator8 SDF.asset");
             TMP_FontAsset readableFont = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF.asset");
             Sprite buttonSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI_Elements/wood_button.png");
 
@@ -213,8 +214,8 @@ namespace Musashi.EditorTools
             storyText.lineSpacing = 16;
             storyText.alignment = TextAlignmentOptions.TopLeft;
             storyText.color = new Color(0.92f, 0.92f, 0.96f, 1f);
-            if (readableFont != null) storyText.font = readableFont;
-            else if (customFont != null) storyText.font = customFont;
+            if (customFont != null) storyText.font = customFont;
+            else if (readableFont != null) storyText.font = readableFont;
             storyText.text =
                 "Once the Shogun’s greatest protector, Musashi was a master of the katana and the lethal shuriken. But ten years ago, when dark forces ravaged the kingdom, he watched helplessly as his lord fell. Consumed by guilt, the veteran samurai exiled himself to the remote Red Maple Forest, drowning his past in sake.\n\n" +
                 "Now, the creeping darkness has reached his final sanctuary. Watching his last drop of sake spill onto the tainted earth, Musashi's drunken haze vanishes. He dons his old uniform, secures his sake gourd and shurikens, and draws the Shogun’s katana—shaking off a decade of dust. The broken man is dead; the legendary warrior has returned to collect a ten-year blood debt.";
@@ -251,8 +252,8 @@ namespace Musashi.EditorTools
             aboutText.lineSpacing = 16;
             aboutText.alignment = TextAlignmentOptions.TopLeft;
             aboutText.color = Color.white;
-            if (readableFont != null) aboutText.font = readableFont;
-            else if (customFont != null) aboutText.font = customFont;
+            if (customFont != null) aboutText.font = customFont;
+            else if (readableFont != null) aboutText.font = readableFont;
             aboutText.text =
                 "<size=28><color=#FFD700><b>PROJECT MENTOR:</b></color></size>\n" +
                 "    Quách Luyl Đa\n\n" +
@@ -478,7 +479,8 @@ namespace Musashi.EditorTools
         [MenuItem("Tools/Musashi/2. Setup Pause Menu In All Maps")]
         public static void SetupPauseMenuInAllMapsMenu()
         {
-            TMP_FontAsset customFont = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/Sprites/UI_Elements/PixelOperator8 SDF.asset");
+            TMP_FontAsset customFont = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/Resources/Fonts/PixelOperator8 SDF.asset")
+                                       ?? AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/Sprites/UI_Elements/PixelOperator8 SDF.asset");
             Sprite buttonSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/UI_Elements/wood_button.png");
 
             CreatePauseMenuPrefab(buttonSprite, customFont);
