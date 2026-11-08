@@ -91,8 +91,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4837224761221428924}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -41.659, y: 0.32956, z: 0}
-  m_LocalScale: {x: 0.632, y: 0.612, z: 1}
+  m_LocalPosition: {x: -41.621, y: 0.1275, z: 0}
+  m_LocalScale: {x: 0.9140336, y: 0.71247727, z: 1.1641785}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1999108050229603883}
@@ -265,7 +265,7 @@ MonoBehaviour:
   defense: 70
   moveSpeed: 2
   hurtSound: {fileID: 8300000, guid: cbddb5535c604a6cae88ce7f9a57c246, type: 3}
-  deathSound: {fileID: 8300000, guid: a7740b0578334377abdc6d51361010af, type: 3}
+  deathSound: {fileID: 8300000, guid: e4a5136dc60c32142825ec8b9da18969, type: 3}
   healthBarFill: {fileID: 7337327049984948956}
   coinPrefab: {fileID: 3969643675363155990, guid: 86a3a6a750e24a44e8c9875d32656394, type: 3}
   minCoins: 3
@@ -290,8 +290,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   patrolDistance: 5
-  attack1Sound: {fileID: 8300000, guid: 96b263a91688414a8778b07b4fff63a8, type: 3}
-  attack2Sound: {fileID: 8300000, guid: 585bcbf6ee57401f8825d42111e72a80, type: 3}
+  attack1Sound: {fileID: 8300000, guid: 5718a10a2a2c4074a3175d95ae972db9, type: 3}
+  attack2Sound: {fileID: 8300000, guid: 6d300ae2430c4450bbfc2c5bdfb599cd, type: 3}
 --- !u!1 &8457756398289458084
 GameObject:
   m_ObjectHideFlags: 0
@@ -449,6 +449,18 @@ PrefabInstance:
     - target: {fileID: 5717916019667438014, guid: 423bc8775884729498cbdde8799017d8, type: 3}
       propertyPath: m_Name
       value: HealthBar
+      objectReference: {fileID: 0}
+    - target: {fileID: 7414206744421734373, guid: 423bc8775884729498cbdde8799017d8, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.017880734
+      objectReference: {fileID: 0}
+    - target: {fileID: 7414206744421734373, guid: 423bc8775884729498cbdde8799017d8, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.0031335347
+      objectReference: {fileID: 0}
+    - target: {fileID: 7414206744421734373, guid: 423bc8775884729498cbdde8799017d8, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1.0445116
       objectReference: {fileID: 0}
     - target: {fileID: 8136583210180189212, guid: 423bc8775884729498cbdde8799017d8, type: 3}
       propertyPath: m_PresetInfoIsWorld
