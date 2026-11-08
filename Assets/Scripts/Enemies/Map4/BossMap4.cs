@@ -91,6 +91,11 @@ namespace Assets.Scripts.Enemies.Map4
         public AudioClip defendBlockSound;
         public AudioClip roarShoutSound;
 
+        [Header("--- BOSS BGM SETTINGS ---")]
+        public AudioClip bossBgmClip;
+        public AudioSource bossBgmSource;
+        [Range(0f, 1f)] public float bossBgmVolume = 0.8f;
+
         [Header("--- SKULL HEALTH BAR (RED THEME) ---")]
         public Sprite skullFrameSprite;
         public Sprite skullBgSprite;
@@ -181,6 +186,60 @@ namespace Assets.Scripts.Enemies.Map4
 
             UpdateSkullBarPhaseVisuals();
             UpdateBossUI();
+            PlayBossBGM();
+        }
+
+        private void OnEnable()
+        {
+            if (bossSpriteRenderer != null && actionState != BossActionState.Dead && currentHealth > 0)
+            {
+                PlayBossBGM();
+            }
+        }
+
+        private void OnDisable()
+        {
+            StopBossBGM();
+        }
+
+        private void PlayBossBGM()
+        {
+            if (actionState == BossActionState.Dead || currentHealth <= 0) return;
+
+            if (bossBgmClip == null)
+            {
+                bossBgmClip = Resources.Load<AudioClip>("Audio/Movement Proposition");
+            }
+
+            if (bossBgmSource == null)
+            {
+                bossBgmSource = GetComponent<AudioSource>();
+                if (bossBgmSource == null)
+                {
+                    bossBgmSource = gameObject.AddComponent<AudioSource>();
+                }
+            }
+
+            if (bossBgmClip != null && bossBgmSource != null)
+            {
+                bossBgmSource.clip = bossBgmClip;
+                bossBgmSource.volume = bossBgmVolume;
+                bossBgmSource.loop = true;
+                bossBgmSource.playOnAwake = true;
+                bossBgmSource.spatialBlend = 0f;
+                if (!bossBgmSource.isPlaying)
+                {
+                    bossBgmSource.Play();
+                }
+            }
+        }
+
+        private void StopBossBGM()
+        {
+            if (bossBgmSource != null && bossBgmSource.isPlaying)
+            {
+                bossBgmSource.Stop();
+            }
         }
 
         private void Update()
@@ -978,6 +1037,7 @@ namespace Assets.Scripts.Enemies.Map4
         {
             actionState = BossActionState.Dead;
             StopAllCoroutines();
+            StopBossBGM();
 
             if (bossSpriteRenderer != null)
             {
